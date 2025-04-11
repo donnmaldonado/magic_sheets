@@ -1,0 +1,19 @@
+body {
+    background-color: #DDE6ED  !important;
+}
+
+.custom-navbar {
+    background-color: #27374D !important;
+}
+
+.main-content {
+    background-color: #DDE6ED !important;
+}
+
+.footer {
+    background-color: #DDE6ED !important;
+}
+.navbar-brand {
+    font-family: 'Leckerli One', cursive;
+    font-size: 2rem;
+}
