@@ -23,7 +23,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark custom-navbar">
         <div class="container">
-            <a class="navbar-brand" href="">MagicSheets</a>
+            <a class="navbar-brand" href="{% url 'home' %}">MagicSheets</a>
             <!-- Collapsable button for mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span> 
@@ -45,7 +45,7 @@
                         <a class="btn btn-outline-light" href="">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <form method="POST" action="" style="margin: 0; padding: 0;">
+                        <form method="POST" action="{% url 'logout' %}" style="margin: 0; padding: 0;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-light">Logout</button>
                         </form>
