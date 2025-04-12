@@ -52,10 +52,10 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="btn btn-outline-light" href="">Login</a>
+                        <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-outline-light" href="">Sign Up</a>
+                        <a class="btn btn-outline-light" href="{% url 'signup' %}">Sign Up</a>
                     </li>
                     {% endif %}
                     
