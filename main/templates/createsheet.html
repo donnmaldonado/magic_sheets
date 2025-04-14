@@ -93,11 +93,6 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            {% if form.published.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.published.errors }}
-                                </div>
-                            {% endif %}
                         </div>
 
                         <div class="d-grid gap-2">
@@ -109,4 +104,115 @@
         </div>
     </div>
 </div>
+
+{% block javascript %}
+<script type="text/javascript"  >
+document.addEventListener('DOMContentLoaded', function() {
+    const gradeSelect = document.getElementById('id_grade_level');
+    const subjectSelect = document.getElementById('id_subject');
+    const topicSelect = document.getElementById('id_topic');
+    const subtopicSelect = document.getElementById('id_subtopic');
+
+    function updateTopics() {
+        const gradeLevel = gradeSelect.value;
+        const subject = subjectSelect.value;
+        
+        if (gradeLevel && subject) {
+            fetch(`/get_topics/?grade_level=${gradeLevel}&subject=${subject}`)
+                .then(response => response.json())
+                .then(data => {
+                    topicSelect.innerHTML = '<option value="">---------</option>';
+                    data.forEach(topic => {
+                        topicSelect.innerHTML += `<option value="${topic.id}">${topic.name}</option>`;
+                    });
+                    // Clear subtopics when topics change
+                    subtopicSelect.innerHTML = '<option value="">---------</option>';
+                });
+        }
+    }
+
+    function updateSubtopics() {
+        const topic = topicSelect.value;
+        
+        if (topic) {
+            fetch(`/get_subtopics/?topic=${topic}`)
+                .then(response => response.json())
+                .then(data => {
+                    subtopicSelect.innerHTML = '<option value="">---------</option>';
+                    data.forEach(subtopic => {
+                        subtopicSelect.innerHTML += `<option value="${subtopic.id}">${subtopic.name}</option>`;
+                    });
+                });
+        }
+    }
+
+    // Add event listeners
+    gradeSelect.addEventListener('change', updateTopics);
+    subjectSelect.addEventListener('change', updateTopics);
+    topicSelect.addEventListener('change', updateSubtopics);
+
+    const tfInput = document.getElementById('{{ form.true_false_questions.id_for_label }}');
+        const fbInput = document.getElementById('{{ form.fill_blank_questions.id_for_label }}');
+        const mcInput = document.getElementById('{{ form.multiple_choice_questions.id_for_label }}');
+        const saInput = document.getElementById('{{ form.short_answer_questions.id_for_label }}');
+        
+        const allInputs = [tfInput, fbInput, mcInput, saInput];
+        const maxQuestions = 25;
+        
+        // Update total count and dropdown options
+        function updateQuestionCount() {
+            let total = 0;
+            
+            // Calculate total from all inputs
+            allInputs.forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            
+            // Update the total display
+            document.getElementById('totalQuestions').textContent = total;
+            
+            // Show warning if over limit
+            const warningElement = document.getElementById('questionLimitWarning');
+            if (total > maxQuestions) {
+                warningElement.style.display = 'block';
+                document.querySelector('button[type="submit"]').disabled = true;
+            } else {
+                warningElement.style.display = 'none';
+                document.querySelector('button[type="submit"]').disabled = false;
+            }
+            
+            // Update max values for each dropdown
+            const remaining = maxQuestions - total;
+            allInputs.forEach(input => {
+                const currentVal = parseInt(input.value) || 0;
+                
+                // Clear existing options
+                while (input.firstChild) {
+                    input.removeChild(input.firstChild);
+                }
+                
+                // Add options from 0 to (current value + remaining)
+                const maxForThis = currentVal + remaining;
+                for (let i = 0; i <= maxForThis; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    if (i === currentVal) {
+                        option.selected = true;
+                    }
+                    input.appendChild(option);
+                }
+            });
+        }
+        
+        // Add event listeners to all input elements
+        allInputs.forEach(input => {
+            input.addEventListener('change', updateQuestionCount);
+        });
+        
+        // Initialize on page load
+        updateQuestionCount();
+});   
+</script>
+{% endblock %}
 {% endblock %}

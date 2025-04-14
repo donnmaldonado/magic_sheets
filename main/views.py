@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm
 from django.contrib import messages
-from .models import Sheet
-
+from .models import Sheet, Topic, SubTopic
+from django.http import JsonResponse
 # Create your views here.
 
 def home(request):
@@ -81,3 +81,15 @@ def createsheet(request):
         form = SheetCreationForm()
     
     return render(request, 'createsheet.html', {'form': form})
+
+def get_topics(request):
+    grade_level_id = request.GET.get('grade_level')
+    subject_id = request.GET.get('subject')
+    
+    topics = Topic.objects.filter(grade_level_id=grade_level_id, subject_id=subject_id)
+    return JsonResponse(list(topics.values('id', 'name')), safe=False)
+
+def get_subtopics(request):
+    topic_id = request.GET.get('topic')
+    subtopics = SubTopic.objects.filter(topic_id=topic_id)
+    return JsonResponse(list(subtopics.values('id', 'name')), safe=False)
