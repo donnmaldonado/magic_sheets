@@ -1,5 +1,112 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Create Sheet</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Create New Sheet</h2>
+                    
+                    <form method="POST" action="{% url 'createsheet' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="{{ form.title.id_for_label }}">Worksheet Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.title.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.grade_level.id_for_label }}" class="form-label">Grade Level</label>
+                            {{ form.grade_level }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.subject.id_for_label }}" class="form-label">Subject</label>
+                            {{ form.subject }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.topic.id_for_label }}" class="form-label">Topic</label>
+                            {{ form.topic }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.subtopic.id_for_label }}" class="form-label">Subtopic</label>
+                            {{ form.subtopic }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Number of Questions by Type</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="{{ form.true_false_questions.id_for_label }}" class="form-label">True/False</label>
+                                    {{ form.true_false_questions }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.fill_blank_questions.id_for_label }}" class="form-label">Fill in the Blank</label>
+                                    {{ form.fill_blank_questions }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.multiple_choice_questions.id_for_label }}" class="form-label">Multiple Choice</label>
+                                    {{ form.multiple_choice_questions }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.short_answer_questions.id_for_label }}" class="form-label">Short Answer</label>
+                                    {{ form.short_answer_questions }}
+                                </div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Total Questions: <span id="totalQuestions">0</span>/25</small>
+                                <div id="questionLimitWarning" class="text-danger" style="display: none;">
+                                    Total questions cannot exceed 25
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Include Answer Sheet</label>
+                            <div class="btn-group" role="group">
+                                {% for radio in form.include_answer_sheet %}
+                                    <div class="form-check form-check-inline">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                            {{ radio.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Make this worksheet public?</label>
+                            <div class="published-options">
+                                {% for radio in form.published %}
+                                    <div class="form-check form-check-inline">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                            {{ radio.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.published.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.published.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Sheet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

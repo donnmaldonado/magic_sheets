@@ -7,9 +7,15 @@ class GradeLevel(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False)
     order = models.IntegerField(blank=False, null=False)
 
+    def __str__(self):
+        return self.name
+
 class Subject(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)
     name = models.CharField(max_length=50, blank=False, null=False)
+
+    def __str__(self):
+        return self.name
 
 class Topic(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False) 
@@ -17,10 +23,16 @@ class Topic(models.Model):
     grade_level = models.ForeignKey(GradeLevel, on_delete=models.CASCADE, blank=False, null=False)
     name = models.CharField(max_length=50, blank=False, null=False)
 
+    def __str__(self):
+        return self.name
+
 class SubTopic(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)  
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False)
     name = models.CharField(max_length=50, blank=False, null=False)
+
+    def __str__(self):
+        return self.name
 
 def worksheet_upload_path(instance, filename):
     # Generates path such as: worksheets/user_id/YYYY-MM-DD/filename
