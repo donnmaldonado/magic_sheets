@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}View Worksheet - Magic Sheets{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ sheet.title }}</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="sheet-details mt-4">
+                                <h4>Worksheet Details:</h4>
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <strong>Grade Level:</strong> {{ sheet.grade_level.name }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Subject:</strong> {{ sheet.subject.name }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Topic:</strong> {{ sheet.topic.name }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Subtopic:</strong> {{ sheet.sub_topic.name }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Creator:</strong> {{ sheet.user.username }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Created:</strong> {{ sheet.created_at }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Status:</strong> 
+                                        {% if sheet.published %}
+                                            <span class="badge bg-success">Public</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Private</span>
+                                        {% endif %}
+                                    </li>                                
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="question-breakdown mt-4">
+                                <h4>Question Breakdown:</h4>
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        True/False Questions: {{ sheet.true_false_count }}
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        Fill in the Blank Questions: {{ sheet.fill_in_the_blank_count }}
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        Multiple Choice Questions: {{ sheet.multiple_choice_count }}
+                                    </li>
+                                    
+                                    <li class="list-group-item">
+                                        Short Answer Questions: {{ sheet.short_answer_count }}
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        Answer Key: {% if sheet.include_answer_key %}Yes{% else %}No{% endif %}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="like-download-buttons mt-5 d-flex gap-2">
+                                {% if request.user != sheet.user %}
+                                    <button id="saveBtn" class="btn btn-outline-primary btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
+                                        {% if is_saved %}Unsave{% else %}Save{% endif %}
+                                    </button>
+                                {% endif %}
+                                {% if is_creator or sheet.published %}
+                                    <button id="likeBtn" class="btn btn-outline-danger btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
+                                        <i class="fa-solid fa-thumbs-up"></i>
+                                        <span class="like-count">{{ sheet.like_count }}</span>
+                                    </button>
+                                    <a href="{{ sheet.docx_file.url }}" class="btn btn-primary btn-sm flex-fill" download>
+                                        Download DOCX
+                                    </a>
+                                    <a href="{{ sheet.pdf_file.url }}" class="btn btn-primary btn-sm flex-fill" download>
+                                        Download PDF
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col d-flex gap-2">
+                            <a href="" class="btn btn-primary btn-sm">
+                                Regenerate Worksheet
+                            </a>
+                            <div class="dropdown">
+                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="regenerateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Choose Option
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="regenerateDropdown">
+                                    <li><a class="dropdown-item" href="#">With New Questions</a></li>
+                                    <li><a class="dropdown-item" href="#">Same Questions</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Different Format</a></li>
+                                </ul>
+                            </div>
+                            <a href="" class="btn btn-primary btn-sm ms-auto">
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+                    <div class="worksheet-preview">
+                        {% if sheet.docx_file %}
+                            <div class="preview-container ">
+                                <div class="content-display border mt-4">
+                                    <pre class="worksheet-text">{{ worksheet_content }}</pre>
+                                </div>
+                            </div>
+                        {% else %}
+                            {% if is_creator %}
+                                <div class="alert alert-info">
+                                    Your worksheet is being generated...
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    This worksheet hasn't been generated yet.
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+        
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .content-display {
+        padding: 2rem;
+        background-color: white;
+        border-radius: 0.25rem;
+    }
+    .worksheet-text {
+        white-space: pre-wrap;
+        font-family: Arial, sans-serif;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+</style>
+
+<script>
+document.getElementById('likeBtn').addEventListener('click', function() {
+    const sheetId = this.dataset.sheetId;
+    const likeCount = this.querySelector('.like-count');
+    const icon = this.querySelector('i');
+    
+    fetch(`/sheet/${sheetId}/toggle-like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        likeCount.textContent = data.like_count;
+        if (data.liked) {
+            icon.classList.add('text-danger');
+        } else {
+            icon.classList.remove('text-danger');
+        }
+    });
+});
+</script>
+{% endblock %}

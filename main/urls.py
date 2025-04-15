@@ -9,5 +9,6 @@ urlpatterns = [
     path("createsheet/", views.createsheet, name="createsheet"),
     path('get_topics/', views.get_topics, name='get_topics'),
     path('get_subtopics/', views.get_subtopics, name='get_subtopics'),
-    
+    path('viewsheet/<int:sheet_id>/', views.viewsheet, name='viewsheet'),
+    path('sheet/<int:sheet_id>/toggle-like/', views.toggle_like, name='toggle_like'),
 ]

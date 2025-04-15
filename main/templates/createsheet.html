@@ -108,6 +108,7 @@
 {% block javascript %}
 <script type="text/javascript"  >
 document.addEventListener('DOMContentLoaded', function() {
+
     const gradeSelect = document.getElementById('id_grade_level');
     const subjectSelect = document.getElementById('id_subject');
     const topicSelect = document.getElementById('id_topic');
@@ -205,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Add event listeners to all input elements
+        // Event listeners for all input elements
         allInputs.forEach(input => {
             input.addEventListener('change', updateQuestionCount);
         });

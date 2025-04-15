@@ -61,6 +61,14 @@ class Sheet(models.Model):
     docx_file = models.FileField(upload_to=worksheet_upload_path, null=True, blank=True)
     pdf_file = models.FileField(upload_to=worksheet_upload_path, null=True, blank=True)
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, blank=False, null=False)
+
+    def get_worksheet_filename(self):
+        """Generate a filename for the worksheet"""
+        return f"worksheet_{self.id}_{self.created_at.strftime('%Y%m%d_%H%M%S')}.docx"
+    
+    @property
+    def like_count(self):
+        return self.likes.count()
     
 
 class SavedSheet(models.Model):
@@ -74,7 +82,8 @@ class SavedSheet(models.Model):
 class LikedSheet(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, blank=False, null=False)
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name='likes', blank=False, null=False)
 
     class Meta:
         unique_together = ('user', 'sheet') # Prevent duplicate likes
+    
