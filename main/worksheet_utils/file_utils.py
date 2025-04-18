@@ -11,6 +11,8 @@ def create_sheet(sheet):
     create_worksheet_files(sheet)
     sheet.save()
 
+def update_worksheet_files(sheet):
+    create_worksheet_files(sheet)
 
 def create_worksheet_files(sheet):
     # Setup paths

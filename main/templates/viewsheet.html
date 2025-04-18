@@ -105,9 +105,11 @@
                                     <li><a class="dropdown-item" href="#">Different Format</a></li>
                                 </ul>
                             </div>
-                            <a href="" class="btn btn-primary btn-sm ms-auto">
+                            {% if is_creator %}
+                            <a href="{% url 'editsheet' sheet.id %}" class="btn btn-primary btn-sm ms-auto">
                                 Edit
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="worksheet-preview">

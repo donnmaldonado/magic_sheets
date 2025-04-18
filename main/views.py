@@ -1,20 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
 from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm
 from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from docx import Document
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph, Spacer
-from .worksheet_utils.generation import generate_worksheet_content
-import os
-from .worksheet_utils.file_utils import create_sheet
+from .worksheet_utils.file_utils import create_sheet as generate_worksheet_files, create_worksheet_files
 # Create your views here.
 
 def home(request):
@@ -85,6 +77,15 @@ def createsheet(request):
                 prompt=Prompt.objects.get(type="GENERATE")
             )
             print(f"Sheet created with ID: {sheet.id}")  # Debug print
+            
+            # Generate the worksheet content and files
+            try:
+                generate_worksheet_files(sheet)
+                messages.success(request, 'Worksheet created successfully!')
+            except Exception as e:
+                messages.error(request, f'Error generating worksheet: {str(e)}')
+                return redirect('createsheet')
+            
             return redirect('viewsheet', sheet_id=sheet.id)
         else:
             print("Form errors:", form.errors)  # Debug print
@@ -148,33 +149,6 @@ def viewsheet(request, sheet_id):
         messages.error(request, 'You do not have permission to view this private worksheet.')
         return redirect('home')
 
-    # Initialize worksheet_content
-    worksheet_content = ""
-    
-    if not sheet.docx_file or not sheet.pdf_file:
-        try:
-            # Only allow generation if user is the creator
-            if sheet.user != request.user:
-                messages.error(request, 'Only the creator can generate this worksheet.')
-                return redirect('home')
-
-            # Create the worksheet and files using the utility function
-            from .worksheet_utils.file_utils import create_sheet as create_sheet_files
-            create_sheet_files(sheet)
-            
-            # Refresh the sheet object to get updated file fields
-            sheet.refresh_from_db()
-            
-            if not sheet.docx_file or not sheet.pdf_file:
-                messages.error(request, 'Failed to generate worksheet files. Please try again.')
-                return redirect('createsheet')
-
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            messages.error(request, f'Error generating worksheet: {str(e)}')
-            return redirect('home')
-
     # Check if the worksheet is saved by the current user
     is_saved = SavedSheet.objects.filter(user=request.user, sheet=sheet).exists()
     is_liked = LikedSheet.objects.filter(user=request.user, sheet=sheet).exists()
@@ -205,3 +179,31 @@ def toggle_like(request, sheet_id):
         'liked': liked,
         'like_count': sheet.like_count
     })
+
+@login_required
+def editsheet(request, sheet_id):
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    
+    # Only allow the creator to edit the sheet
+    if sheet.user != request.user:
+        messages.error(request, 'You do not have permission to edit this worksheet.')
+        return redirect('viewsheet', sheet_id=sheet_id)
+    
+    if request.method == 'POST':
+        new_content = request.POST.get('content', '')
+        if new_content:
+            sheet.content = new_content
+            sheet.save()
+            create_worksheet_files(sheet)
+            
+            return redirect('viewsheet', sheet_id=sheet_id)
+        else:
+            messages.error(request, 'Content cannot be empty.')
+    
+    context = {
+        'sheet': sheet,
+        'content': sheet.content
+    }
+    
+    return render(request, 'editsheet.html', context)
+    
