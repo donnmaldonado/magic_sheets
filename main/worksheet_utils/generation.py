@@ -4,6 +4,7 @@ import os
 from main.models import Prompt
 load_dotenv()
 
+
 def generate_worksheet_content(sheet):
     """
     Generate worksheet content using OpenAI API

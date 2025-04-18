@@ -12,7 +12,7 @@ from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, Spacer
-from .worksheet_gen.generation import generate_worksheet_content
+from .worksheet_utils.generation import generate_worksheet_content
 import os
 # Create your views here.
 
@@ -137,12 +137,12 @@ def create_sheet(request):
     
     return render(request, 'create_sheet.html', {'form': form})
 
-# View worksheet view 
+#View worksheet view 
 @login_required
 def viewsheet(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
     
-    # Only show permission error if trying to access private sheet of another user
+    # Only show permission error if trying to access private sheet of another user thats not published
     if not sheet.published and sheet.user != request.user:
         messages.error(request, 'You do not have permission to view this private worksheet.')
         return redirect('home')
@@ -164,11 +164,11 @@ def viewsheet(request, sheet_id):
             media_dir = os.path.join(settings.MEDIA_ROOT, 'worksheets', str(request.user.id))
             os.makedirs(media_dir, exist_ok=True)
             
-            filename = sheet.get_worksheet_filename()
-            docx_path = os.path.join(media_dir, filename)
-            pdf_filename = filename.replace('.docx', '.pdf')
-            pdf_path = os.path.join(media_dir, pdf_filename)
+            filename = f"worksheet_{sheet.id}_{sheet.created_at.strftime('%Y%m%d_%H%M%S')}"
+            docx_path = os.path.join(media_dir, f"{filename}.docx")
+            pdf_path = os.path.join(media_dir, f"{filename}.pdf")
 
+            print(f"DOCX path: {docx_path}")
             # Create DOCX
             doc = Document()
             doc.add_paragraph('Name: ___________________________ Date: ___________________________')
@@ -203,13 +203,10 @@ def viewsheet(request, sheet_id):
             # Build the PDF
             pdf_doc.build(story)
 
-            # Update model with relative paths
-            relative_docx_path = os.path.join('worksheets', str(request.user.id), filename)
-            relative_pdf_path = os.path.join('worksheets', str(request.user.id), pdf_filename)
             
-            sheet.docx_file.name = relative_docx_path
-            sheet.pdf_file.name = relative_pdf_path
-            sheet.save()            
+            sheet.docx_file.name = f"worksheets/{request.user.id}/{filename}.docx"
+            sheet.pdf_file.name = f"worksheets/{request.user.id}/{filename}.pdf"
+            sheet.save()           
         except Exception as e:
             import traceback
             traceback.print_exc()

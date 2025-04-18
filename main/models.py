@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+import os
+from django.conf import settings
 
 class GradeLevel(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False) 
@@ -34,15 +36,24 @@ class SubTopic(models.Model):
     def __str__(self):
         return self.name
 
-def worksheet_upload_path(instance, filename):
-    # Generates path such as: worksheets/user_id/YYYY-MM-DD/filename
-    return f'worksheets/{instance.creator.id}/{instance.created_at.strftime("%Y-%m-%d")}/{filename}'
-
 class Prompt(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)
     type = models.CharField(max_length=50, blank=False, null=False)
     text = models.TextField(blank=False, null=False)
+
+
+def worksheet_upload_path(instance, filename):
+    # Generate filename based only on instance data
+    base_filename = f"worksheet_{instance.id}_{instance.created_at.strftime('%Y%m%d_%H%M%S')}"
     
+    # Determine extension based on field name rather than original filename
+    if 'pdf' in filename:
+        ext = 'pdf'
+    else:
+        ext = 'docx'
+    
+    return f'worksheets/{instance.user.id}/{base_filename}.{ext}'
+
 class Sheet(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)  
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
@@ -61,11 +72,8 @@ class Sheet(models.Model):
     docx_file = models.FileField(upload_to=worksheet_upload_path, null=True, blank=True)
     pdf_file = models.FileField(upload_to=worksheet_upload_path, null=True, blank=True)
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, blank=False, null=False)
+    # content = models.TextField(blank=False)
 
-    def get_worksheet_filename(self):
-        """Generate a filename for the worksheet"""
-        return f"worksheet_{self.id}_{self.created_at.strftime('%Y%m%d_%H%M%S')}.docx"
-    
     @property
     def like_count(self):
         return self.likes.count()
