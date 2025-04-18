@@ -72,7 +72,7 @@ class Sheet(models.Model):
     docx_file = models.FileField(upload_to=worksheet_upload_path, null=True, blank=True)
     pdf_file = models.FileField(upload_to=worksheet_upload_path, null=True, blank=True)
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, blank=False, null=False)
-    # content = models.TextField(blank=False)
+    content = models.TextField()
 
     @property
     def like_count(self):

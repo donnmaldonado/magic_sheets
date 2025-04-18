@@ -14,6 +14,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, Spacer
 from .worksheet_utils.generation import generate_worksheet_content
 import os
+from .worksheet_utils.file_utils import create_sheet
 # Create your views here.
 
 def home(request):
@@ -150,84 +151,36 @@ def viewsheet(request, sheet_id):
     # Initialize worksheet_content
     worksheet_content = ""
     
-    if not sheet.docx_file:
+    if not sheet.docx_file or not sheet.pdf_file:
         try:
             # Only allow generation if user is the creator
             if sheet.user != request.user:
                 messages.error(request, 'Only the creator can generate this worksheet.')
                 return redirect('home')
+
+            # Create the worksheet and files using the utility function
+            from .worksheet_utils.file_utils import create_sheet as create_sheet_files
+            create_sheet_files(sheet)
             
-            # Generate content using OpenAI
-            content = generate_worksheet_content(sheet)
+            # Refresh the sheet object to get updated file fields
+            sheet.refresh_from_db()
             
-            # Setup paths
-            media_dir = os.path.join(settings.MEDIA_ROOT, 'worksheets', str(request.user.id))
-            os.makedirs(media_dir, exist_ok=True)
-            
-            filename = f"worksheet_{sheet.id}_{sheet.created_at.strftime('%Y%m%d_%H%M%S')}"
-            docx_path = os.path.join(media_dir, f"{filename}.docx")
-            pdf_path = os.path.join(media_dir, f"{filename}.pdf")
+            if not sheet.docx_file or not sheet.pdf_file:
+                messages.error(request, 'Failed to generate worksheet files. Please try again.')
+                return redirect('createsheet')
 
-            print(f"DOCX path: {docx_path}")
-            # Create DOCX
-            doc = Document()
-            doc.add_paragraph('Name: ___________________________ Date: ___________________________')
-            doc.add_paragraph(content)
-            doc.save(docx_path)
-
-            # Create PDF using ReportLab
-            pdf_doc = SimpleDocTemplate(
-                pdf_path,
-                pagesize=letter,
-                rightMargin=72,
-                leftMargin=72,
-                topMargin=72,
-                bottomMargin=72
-            )
-
-            # Create the PDF content
-            styles = getSampleStyleSheet()
-            story = []
-
-            # Add name and date
-            story.append(Paragraph('Name: ___________________________ Date: ___________________________', styles['Normal']))
-            story.append(Spacer(1, 12))
-
-            # Split content into paragraphs and add them
-            paragraphs = content.split('\n')
-            for para in paragraphs:
-                if para.strip():  # Skip empty lines
-                    story.append(Paragraph(para, styles['Normal']))
-                    story.append(Spacer(1, 12))
-
-            # Build the PDF
-            pdf_doc.build(story)
-
-            
-            sheet.docx_file.name = f"worksheets/{request.user.id}/{filename}.docx"
-            sheet.pdf_file.name = f"worksheets/{request.user.id}/{filename}.pdf"
-            sheet.save()           
         except Exception as e:
             import traceback
             traceback.print_exc()
             messages.error(request, f'Error generating worksheet: {str(e)}')
-    
-    # Extract text content from DOCX if worksheet exists
-    if sheet.docx_file:
-        try:
-            doc = Document(sheet.docx_file.path)
-            worksheet_content = "\n\n".join([paragraph.text for paragraph in doc.paragraphs])
-        except Exception as e:
-            print(f"Error reading DOCX: {str(e)}")
-            messages.error(request, "Error reading worksheet content.")
+            return redirect('home')
 
-     # Check if the worksheet is saved by the current user
+    # Check if the worksheet is saved by the current user
     is_saved = SavedSheet.objects.filter(user=request.user, sheet=sheet).exists()
     is_liked = LikedSheet.objects.filter(user=request.user, sheet=sheet).exists()
 
     context = {
         'sheet': sheet,
-        'worksheet_content': worksheet_content,
         'is_creator': sheet.user == request.user,
         'is_saved': is_saved,
         'is_liked': is_liked
