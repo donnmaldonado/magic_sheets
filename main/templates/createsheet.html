@@ -10,8 +10,8 @@
                     
                     <form method="POST" action="{% url 'createsheet' %}">
                         {% csrf_token %}
-                        <div class="form-group">
-                            <label for="{{ form.title.id_for_label }}">Worksheet Title</label>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="{{ form.title.id_for_label }}">Worksheet Title</label>
                             {{ form.title }}
                             {% if form.title.errors %}
                                 <div class="invalid-feedback">
