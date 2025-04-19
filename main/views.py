@@ -227,16 +227,15 @@ def regenerate_sheet(request, sheet_id):
             try:
                 # Update the sheet's prompt
                 sheet.prompt = Prompt.objects.get(id=prompt_id)
-                sheet.save()
-                
                 # Regenerate the content and files
                 sheet.content = regenerate_worksheet_content(sheet, Prompt.objects.get(id=prompt_id))
                 sheet.save()
+                create_worksheet_files(sheet)
                 messages.success(request, 'Worksheet regenerated successfully!')
             except Exception as e:
                 messages.error(request, f'Error regenerating worksheet: {str(e)}')
         else:
-            messages.error(request, 'Please select a regeneration option.')
+            messages.warning(request, 'Please select a regeneration option.')
     
     return redirect('viewsheet', sheet_id=sheet_id)
     

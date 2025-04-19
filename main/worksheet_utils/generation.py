@@ -44,7 +44,8 @@ def generate_worksheet_content(sheet):
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
         print(f"Completion tokens: {response.usage.completion_tokens}")
         print(f"Total tokens: {response.usage.total_tokens}")
-        return response.choices[0].message.content
+        content = response.choices[0].message.content.replace("**", "").replace("---", "")
+        return content
     
     except Exception as e:
         print(f"Error generating content: {e}")
@@ -79,7 +80,8 @@ def regenerate_worksheet_content(sheet, prompt):
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
         print(f"Completion tokens: {response.usage.completion_tokens}")
         print(f"Total tokens: {response.usage.total_tokens}")
-        return response.choices[0].message.content
+        content = response.choices[0].message.content.replace("**", "").replace("---", "")
+        return content
     
     except Exception as e:
         print(f"Error generating content: {e}")
