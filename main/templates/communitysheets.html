@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Community Worksheets - Magic Sheets{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Community Worksheets</h1>
+    
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="filterForm" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <select class="form-select" id="grade_level" name="grade_level">
+                        <option value="">All Grades</option>
+                        {% for grade in grade_levels %}
+                            <option value="{{ grade.id }}" {% if selected_grade == grade.id|stringformat:"i" %}selected{% endif %}>
+                                {{ grade.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="subject" name="subject">
+                        <option value="">All Subjects</option>
+                        {% for subj in subjects %}
+                            <option value="{{ subj.id }}" {% if selected_subject == subj.id|stringformat:"i" %}selected{% endif %}>
+                                {{ subj.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="topic" name="topic">
+                        <option value="">All Topics</option>
+                        {% for t in topics %}
+                            <option value="{{ t.id }}" {% if selected_topic == t.id|stringformat:"i" %}selected{% endif %}>
+                                {{ t.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="subtopic" name="subtopic">
+                        <option value="">All Subtopics</option>
+                        {% for st in subtopics %}
+                            <option value="{{ st.id }}" {% if selected_subtopic == st.id|stringformat:"i" %}selected{% endif %}>
+                                {{ st.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="sort_by">
+                        <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Newest First</option>
+                        <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Oldest First</option>
+                        <option value="likes_desc" {% if selected_sort == 'likes_desc' %}selected{% endif %}>Most Liked</option>
+                        <option value="likes_asc" {% if selected_sort == 'likes_asc' %}selected{% endif %}>Least Liked</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2 align-items-end">
+                    <button type="submit" class="btn btn-primary flex-grow-1">Apply</button>
+                    <a href="{% url 'communitysheets' %}" class="btn btn-secondary flex-grow-1">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if published_sheets %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for sheet in published_sheets %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ sheet.title }}</h5>
+                            <div class="card-text">
+                                <p class="mb-1">
+                                    <strong>Grade:</strong> {{ sheet.grade_level.name }}<br>
+                                    <strong>Subject:</strong> {{ sheet.subject.name }}<br>
+                                    <strong>Topic:</strong> {{ sheet.topic.name }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">
+                                        By {{ sheet.user.username }}<br>
+                                        {{ sheet.created_at|date:"M d, Y" }}
+                                    </small>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-thumbs-up"></i> {{ sheet.total_likes|default:0 }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-primary">View Worksheet</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            No published worksheets available yet. Be the first to create one!
+        </div>
+    {% endif %}
+</div>
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gradeSelect = document.getElementById('grade_level');
+    const subjectSelect = document.getElementById('subject');
+    const topicSelect = document.getElementById('topic');
+    const subtopicSelect = document.getElementById('subtopic');
+    
+    // Function to update topics based on grade and subject
+    function updateTopics() {
+        const gradeLevel = gradeSelect.value;
+        const subject = subjectSelect.value;
+        
+        if (gradeLevel && subject) {
+            fetch(`/get_topics/?grade_level=${gradeLevel}&subject=${subject}`)
+                .then(response => response.json())
+                .then(data => {
+                    topicSelect.innerHTML = '<option value="">All Topics</option>';
+                    data.forEach(topic => {
+                        topicSelect.innerHTML += `<option value="${topic.id}">${topic.name}</option>`;
+                    });
+                    // Clear subtopics when topics change
+                    subtopicSelect.innerHTML = '<option value="">All Subtopics</option>';
+                });
+        } else {
+            topicSelect.innerHTML = '<option value="">All Topics</option>';
+            subtopicSelect.innerHTML = '<option value="">All Subtopics</option>';
+        }
+    }
+    
+    // Function to update subtopics based on topic
+    function updateSubtopics() {
+        const topic = topicSelect.value;
+        
+        if (topic) {
+            fetch(`/get_subtopics/?topic=${topic}`)
+                .then(response => response.json())
+                .then(data => {
+                    subtopicSelect.innerHTML = '<option value="">All Subtopics</option>';
+                    data.forEach(subtopic => {
+                        subtopicSelect.innerHTML += `<option value="${subtopic.id}">${subtopic.name}</option>`;
+                    });
+                });
+        } else {
+            subtopicSelect.innerHTML = '<option value="">All Subtopics</option>';
+        }
+    }
+    
+    // Add event listeners
+    gradeSelect.addEventListener('change', updateTopics);
+    subjectSelect.addEventListener('change', updateTopics);
+    topicSelect.addEventListener('change', updateSubtopics);
+    
+    // Initialize the form state
+    updateTopics();
+    updateSubtopics();
+});
+</script>
+{% endblock %}
+{% endblock %}

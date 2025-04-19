@@ -21,7 +21,7 @@ class Subject(models.Model):
 
 class Topic(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False) 
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, blank=False, null=False)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, blank=False, null=False, related_name='topics')
     grade_level = models.ForeignKey(GradeLevel, on_delete=models.CASCADE, blank=False, null=False)
     name = models.CharField(max_length=50, blank=False, null=False)
 
@@ -30,7 +30,7 @@ class Topic(models.Model):
 
 class SubTopic(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)  
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False, related_name='subtopics')
     name = models.CharField(max_length=50, blank=False, null=False)
 
     def __str__(self):
@@ -60,8 +60,8 @@ class Sheet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
     grade_level = models.ForeignKey(GradeLevel, on_delete=models.CASCADE, blank=False, null=False)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, blank=False, null=False)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False)
-    sub_topic = models.ForeignKey(SubTopic, on_delete=models.CASCADE, blank=False, null=False)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, blank=False, null=False, related_name='sheets')
+    sub_topic = models.ForeignKey(SubTopic, on_delete=models.CASCADE, blank=False, null=False, related_name='sheets')
     title = models.CharField(max_length=50, blank=False, null=False)
     published = models.BooleanField(default=False, blank=False, null=False)
     created_at = models.DateTimeField(default=timezone.now, blank=False, null=False)

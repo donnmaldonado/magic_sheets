@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm
-from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet
+from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, GradeLevel, Subject
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .worksheet_utils.file_utils import create_sheet as generate_worksheet_files, create_worksheet_files
 from .worksheet_utils.generation import regenerate_worksheet_content
+from django.db import models
 # Create your views here.
 
 def home(request):
@@ -47,7 +48,6 @@ def signup(request):
     return render(request, "signup.html", {'form': form})
 
 def logout(request):
-
     if request.method == 'POST':
         auth_logout(request)
         messages.success(request, 'You have been logged out successfully.')
@@ -185,6 +185,23 @@ def toggle_like(request, sheet_id):
         'like_count': sheet.like_count
     })
 
+@require_POST
+@login_required
+def toggle_save(request, sheet_id):
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    saved_sheet, created = SavedSheet.objects.get_or_create(user=request.user, sheet=sheet)
+    
+    if not created:
+        # User already saved the sheet, so unsave it
+        saved_sheet.delete()
+        saved = False
+    else:
+        saved = True
+
+    return JsonResponse({
+        'saved': saved
+    })
+
 @login_required
 def editsheet(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
@@ -238,4 +255,109 @@ def regenerate_sheet(request, sheet_id):
             messages.warning(request, 'Please select a regeneration option.')
     
     return redirect('viewsheet', sheet_id=sheet_id)
+
+def communitysheets(request):
+    # Get all published sheets ordered by creation date (newest first)
+    published_sheets = Sheet.objects.filter(published=True)
     
+    # Get filter parameters from request
+    grade_level = request.GET.get('grade_level')
+    subject = request.GET.get('subject')
+    topic = request.GET.get('topic')
+    subtopic = request.GET.get('subtopic')
+    sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
+    
+    # Apply filters if they exist
+    if grade_level:
+        published_sheets = published_sheets.filter(grade_level_id=grade_level)
+    if subject:
+        published_sheets = published_sheets.filter(subject_id=subject)
+    if topic:
+        published_sheets = published_sheets.filter(topic_id=topic)
+    if subtopic:
+        published_sheets = published_sheets.filter(sub_topic_id=subtopic)
+    
+    # Apply sorting
+    if sort_by == 'date_desc':
+        published_sheets = published_sheets.order_by('-created_at')
+    elif sort_by == 'date_asc':
+        published_sheets = published_sheets.order_by('created_at')
+    elif sort_by == 'likes_desc':
+        published_sheets = published_sheets.annotate(total_likes=models.Count('likes')).order_by('-total_likes')
+    elif sort_by == 'likes_asc':
+        published_sheets = published_sheets.annotate(total_likes=models.Count('likes')).order_by('total_likes')
+    
+    # Get all available options for filters
+    grade_levels = GradeLevel.objects.all()
+    subjects = Subject.objects.all()
+    topics = Topic.objects.all()
+    subtopics = SubTopic.objects.all()
+    
+    context = {
+        'published_sheets': published_sheets,
+        'grade_levels': grade_levels,
+        'subjects': subjects,
+        'topics': topics,
+        'subtopics': subtopics,
+        'selected_grade': grade_level,
+        'selected_subject': subject,
+        'selected_topic': topic,
+        'selected_subtopic': subtopic,
+        'selected_sort': sort_by,
+    }
+    return render(request, 'communitysheets.html', context)
+
+@login_required
+def savedsheets(request):
+    # Get all sheets saved by the current user
+    saved_sheets = Sheet.objects.filter(
+        savedsheet__user=request.user,
+        published=True  # Only show published sheets
+    )
+    
+    # Get filter parameters from request
+    grade_level = request.GET.get('grade_level')
+    subject = request.GET.get('subject')
+    topic = request.GET.get('topic')
+    subtopic = request.GET.get('subtopic')
+    sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
+    
+    # Apply filters if they exist
+    if grade_level:
+        saved_sheets = saved_sheets.filter(grade_level_id=grade_level)
+    if subject:
+        saved_sheets = saved_sheets.filter(subject_id=subject)
+    if topic:
+        saved_sheets = saved_sheets.filter(topic_id=topic)
+    if subtopic:
+        saved_sheets = saved_sheets.filter(sub_topic_id=subtopic)
+    
+    # Apply sorting
+    if sort_by == 'date_desc':
+        saved_sheets = saved_sheets.order_by('-created_at')
+    elif sort_by == 'date_asc':
+        saved_sheets = saved_sheets.order_by('created_at')
+    elif sort_by == 'likes_desc':
+        saved_sheets = saved_sheets.annotate(total_likes=models.Count('likes')).order_by('-total_likes')
+    elif sort_by == 'likes_asc':
+        saved_sheets = saved_sheets.annotate(total_likes=models.Count('likes')).order_by('total_likes')
+    
+    # Get all available options for filters
+    grade_levels = GradeLevel.objects.all()
+    subjects = Subject.objects.all()
+    topics = Topic.objects.all()
+    subtopics = SubTopic.objects.all()
+    
+    context = {
+        'saved_sheets': saved_sheets,
+        'grade_levels': grade_levels,
+        'subjects': subjects,
+        'topics': topics,
+        'subtopics': subtopics,
+        'selected_grade': grade_level,
+        'selected_subject': subject,
+        'selected_topic': topic,
+        'selected_subtopic': subtopic,
+        'selected_sort': sort_by,
+    }
+    return render(request, 'savedsheets.html', context)

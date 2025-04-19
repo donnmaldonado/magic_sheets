@@ -11,6 +11,9 @@ urlpatterns = [
     path('get_subtopics/', views.get_subtopics, name='get_subtopics'),
     path('viewsheet/<int:sheet_id>/', views.viewsheet, name='viewsheet'),
     path('sheet/<int:sheet_id>/toggle-like/', views.toggle_like, name='toggle_like'),
+    path('sheet/<int:sheet_id>/toggle-save/', views.toggle_save, name='toggle_save'),
+    path('savedsheets/', views.savedsheets, name='savedsheets'),
     path('editsheet/<int:sheet_id>/', views.editsheet, name='editsheet'),
     path('regenerate/<int:sheet_id>/', views.regenerate_sheet, name='regenerate_sheet'),
+    path('communitysheets/', views.communitysheets, name='communitysheets'),
 ]
