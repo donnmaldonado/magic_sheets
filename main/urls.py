@@ -12,4 +12,5 @@ urlpatterns = [
     path('viewsheet/<int:sheet_id>/', views.viewsheet, name='viewsheet'),
     path('sheet/<int:sheet_id>/toggle-like/', views.toggle_like, name='toggle_like'),
     path('editsheet/<int:sheet_id>/', views.editsheet, name='editsheet'),
+    path('regenerate/<int:sheet_id>/', views.regenerate_sheet, name='regenerate_sheet'),
 ]

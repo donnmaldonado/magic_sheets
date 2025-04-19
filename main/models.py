@@ -39,6 +39,7 @@ class SubTopic(models.Model):
 class Prompt(models.Model):
     id = models.AutoField(primary_key=True, blank=False, null=False)
     type = models.CharField(max_length=50, blank=False, null=False)
+    name = models.CharField(max_length=50, blank=False, null=False)
     text = models.TextField(blank=False, null=False)
 
 

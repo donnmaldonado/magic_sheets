@@ -50,4 +50,39 @@ def generate_worksheet_content(sheet):
         print(f"Error generating content: {e}")
         raise
     
+def regenerate_worksheet_content(sheet, prompt):
+    """
+    Regenerate worksheet content using OpenAI API
+    """
+    # OPENAI API KEY
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    # Get the content of the worksheet
+    content = sheet.content
+
+    # Get the prompt for the worksheet
+    sheet.prompt = prompt
+    sheet.save()
+
+    # Get the specifications for the worksheet
+    specifications = "Use the following instruction as a guide to regenerate the worksheet: " + prompt.text
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a professional educator creating a worksheet."},
+                {"role": "user", "content": specifications + "Here is the original worksheet: " + content}
+            ],
+            max_tokens=2000
+        )
+        print("\nToken Usage:")
+        print(f"Prompt tokens: {response.usage.prompt_tokens}")
+        print(f"Completion tokens: {response.usage.completion_tokens}")
+        print(f"Total tokens: {response.usage.total_tokens}")
+        return response.choices[0].message.content
+    
+    except Exception as e:
+        print(f"Error generating content: {e}")
+        raise
+    
     

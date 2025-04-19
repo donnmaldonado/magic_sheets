@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .worksheet_utils.file_utils import create_sheet as generate_worksheet_files, create_worksheet_files
+from .worksheet_utils.generation import regenerate_worksheet_content
 # Create your views here.
 
 def home(request):
@@ -152,12 +153,16 @@ def viewsheet(request, sheet_id):
     # Check if the worksheet is saved by the current user
     is_saved = SavedSheet.objects.filter(user=request.user, sheet=sheet).exists()
     is_liked = LikedSheet.objects.filter(user=request.user, sheet=sheet).exists()
+    
+    # Get all regenerate prompts for the dropdown
+    regenerate_prompts = Prompt.objects.filter(type='REGENERATE')
 
     context = {
         'sheet': sheet,
         'is_creator': sheet.user == request.user,
         'is_saved': is_saved,
-        'is_liked': is_liked
+        'is_liked': is_liked,
+        'regenerate_prompts': regenerate_prompts
     }
     
     return render(request, 'viewsheet.html', context)
@@ -206,4 +211,32 @@ def editsheet(request, sheet_id):
     }
     
     return render(request, 'editsheet.html', context)
+
+@login_required
+def regenerate_sheet(request, sheet_id):
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    
+    # Only allow the creator to regenerate
+    if sheet.user != request.user:
+        messages.error(request, 'You do not have permission to regenerate this worksheet.')
+        return redirect('viewsheet', sheet_id=sheet_id)
+    
+    if request.method == 'POST':
+        prompt_id = request.POST.get('prompt_id')
+        if prompt_id:
+            try:
+                # Update the sheet's prompt
+                sheet.prompt = Prompt.objects.get(id=prompt_id)
+                sheet.save()
+                
+                # Regenerate the content and files
+                sheet.content = regenerate_worksheet_content(sheet, Prompt.objects.get(id=prompt_id))
+                sheet.save()
+                messages.success(request, 'Worksheet regenerated successfully!')
+            except Exception as e:
+                messages.error(request, f'Error regenerating worksheet: {str(e)}')
+        else:
+            messages.error(request, 'Please select a regeneration option.')
+    
+    return redirect('viewsheet', sheet_id=sheet_id)
     

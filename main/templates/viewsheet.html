@@ -91,20 +91,20 @@
                     </div>
                     <div class="row mt-4">
                         <div class="col d-flex gap-2">
-                            <a href="" class="btn btn-primary btn-sm">
-                                Regenerate Worksheet
-                            </a>
-                            <div class="dropdown">
-                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="regenerateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Choose Option
+                            {% if is_creator %}
+                            <form method="POST" action="{% url 'regenerate_sheet' sheet.id %}" class="d-flex gap-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    Regenerate
                                 </button>
-                                <ul class="dropdown-menu" aria-labelledby="regenerateDropdown">
-                                    <li><a class="dropdown-item" href="#">With New Questions</a></li>
-                                    <li><a class="dropdown-item" href="#">Same Questions</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#">Different Format</a></li>
-                                </ul>
-                            </div>
+                                <select name="prompt_id" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="">Select Regeneration Option</option>
+                                    {% for prompt in regenerate_prompts %}
+                                    <option value="{{ prompt.id }}">{{ prompt.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                            {% endif %}
                             {% if is_creator %}
                             <a href="{% url 'editsheet' sheet.id %}" class="btn btn-primary btn-sm ms-auto">
                                 Edit
