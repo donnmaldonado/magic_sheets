@@ -83,17 +83,19 @@
                                 By {{ sheet.user.username }}<br>
                                 {{ sheet.created_at|date:"M d, Y" }}
                             </small>
-                            <div class="d-flex gap-2">
-                                <span class="badge bg-primary">
-                                    <i class="fas fa-thumbs-up"></i> {{ sheet.total_likes|default:0 }}
-                                </span>
-                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer bg-transparent">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-primary">View Worksheet</a>
+                    <div class="d-flex gap-2">
+                        <button id="likeBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
+                            <i class="fa-solid fa-thumbs-up"></i>
+                            <span class="like-count">{{ sheet.like_count }}</span>
+                        </button>
+                        <button id="saveBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}" data-is-saved="true">
+                            Unsave
+                        </button>
+                        <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-primary custom-blue-btn flex-fill">View</a>
                     </div>
                 </div>
             </div>
@@ -157,9 +159,58 @@
         // Initialize the form state
         updateTopics();
         updateSubtopics();
+
+        // Like button functionality
+        document.querySelectorAll('#likeBtn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sheetId = this.dataset.sheetId;
+                const likeCount = this.querySelector('.like-count');
+                const icon = this.querySelector('i');
+                
+                fetch(`/sheet/${sheetId}/toggle-like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    likeCount.textContent = data.like_count;
+                    if (data.liked) {
+                        icon.classList.add('text-warning');
+                    } else {
+                        icon.classList.remove('text-warning');
+                    }
+                });
+            });
+        });
+
+        // Save button functionality
+        document.querySelectorAll('#saveBtn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sheetId = this.dataset.sheetId;
+                const button = this;
+                
+                fetch(`/sheet/${sheetId}/toggle-save/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    button.textContent = data.saved ? 'Unsave' : 'Save';
+                    button.dataset.isSaved = data.saved;
+                    // If unsaved, remove the card from the page
+                    if (!data.saved) {
+                        button.closest('.col').remove();
+                    }
+                });
+            });
+        });
     });
-    </script>
-    {% endblock %}
+</script>
+{% endblock %}
 {% endblock %}
 
 

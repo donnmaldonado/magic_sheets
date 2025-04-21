@@ -31,7 +31,7 @@
                                         <strong>Creator:</strong> {{ sheet.user.username }}
                                     </li>
                                     <li class="list-group-item">
-                                        <strong>Created:</strong> {{ sheet.created_at }}
+                                        <strong>Created:</strong> {{ sheet.created_at|date:"F d, Y" }}
                                     </li>
                                     <li class="list-group-item">
                                         <strong>Status:</strong> 
@@ -155,9 +155,9 @@ document.getElementById('likeBtn').addEventListener('click', function() {
     .then(data => {
         likeCount.textContent = data.like_count;
         if (data.liked) {
-            icon.classList.add('text-danger');
+            icon.classList.add('text-warning');
         } else {
-            icon.classList.remove('text-danger');
+            icon.classList.remove('text-warning');
         }
     });
 });

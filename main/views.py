@@ -293,6 +293,15 @@ def communitysheets(request):
     topics = Topic.objects.all()
     subtopics = SubTopic.objects.all()
     
+    # Add is_saved information to each sheet
+    if request.user.is_authenticated:
+        saved_sheet_ids = set(SavedSheet.objects.filter(user=request.user).values_list('sheet_id', flat=True))
+        for sheet in published_sheets:
+            sheet.is_saved = sheet.id in saved_sheet_ids
+    else:
+        for sheet in published_sheets:
+            sheet.is_saved = False
+    
     context = {
         'published_sheets': published_sheets,
         'grade_levels': grade_levels,
