@@ -285,14 +285,6 @@ function scrollToReviews() {
     }
 }
 
-// Try scrolling when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.hash === '#reviews') {
-        // Wait a bit for all content to load
-        setTimeout(scrollToReviews, 500);
-    }
-});
-
 // Also try scrolling when the page is fully loaded
 window.addEventListener('load', function() {
     if (window.location.hash === '#reviews') {

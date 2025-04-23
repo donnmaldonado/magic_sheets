@@ -8,69 +8,75 @@
     
     <!-- Filter Form -->
     <div class="card mb-4">
-        <div class="card-body">
+        <div class="card-body" style="padding: 0.5rem;">
             <form id="filterForm" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-2">
-                    <select class="form-select" id="grade_level" name="grade_level">
-                        <option value="">All Grades</option>
-                        {% for grade in grade_levels %}
-                            <option value="{{ grade.id }}" {% if selected_grade == grade.id|stringformat:"i" %}selected{% endif %}>
-                                {{ grade.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <select class="form-select-sm w-100" id="grade_level" name="grade_level">
+                                <option value="">All Grades</option>
+                                {% for grade in grade_levels %}
+                                    <option value="{{ grade.id }}" {% if selected_grade == grade.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ grade.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select-sm w-100" id="subject" name="subject">
+                                <option value="">All Subjects</option>
+                                {% for subj in subjects %}
+                                    <option value="{{ subj.id }}" {% if selected_subject == subj.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ subj.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select-sm w-100" id="topic" name="topic">
+                                <option value="">All Topics</option>
+                                {% for t in topics %}
+                                    <option value="{{ t.id }}" {% if selected_topic == t.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ t.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select-sm w-100" id="subtopic" name="subtopic">
+                                <option value="">All Subtopics</option>
+                                {% for st in subtopics %}
+                                    <option value="{{ st.id }}" {% if selected_subtopic == st.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ st.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select-sm w-100" id="prompt_name" name="prompt_name">
+                                <option value="">All Prompts</option>
+                                {% for pn in prompt_names %}
+                                    <option value="{{ pn }}" {% if selected_prompt_name == pn %}selected{% endif %}>
+                                        {{ pn }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select-sm w-100" name="sort_by">
+                                <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Newest First</option>
+                                <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Oldest First</option>
+                                <option value="likes_desc" {% if selected_sort == 'likes_desc' %}selected{% endif %}>Most Liked</option>
+                                <option value="likes_asc" {% if selected_sort == 'likes_asc' %}selected{% endif %}>Least Liked</option>
+                                <option value="rating_desc" {% if selected_sort == 'rating_desc' %}selected{% endif %}>Highest Rated</option>
+                                <option value="rating_asc" {% if selected_sort == 'rating_asc' %}selected{% endif %}>Lowest Rated</option>
+                            </select>
+                        </div>
+                    </div>  
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="subject" name="subject">
-                        <option value="">All Subjects</option>
-                        {% for subj in subjects %}
-                            <option value="{{ subj.id }}" {% if selected_subject == subj.id|stringformat:"i" %}selected{% endif %}>
-                                {{ subj.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="topic" name="topic">
-                        <option value="">All Topics</option>
-                        {% for t in topics %}
-                            <option value="{{ t.id }}" {% if selected_topic == t.id|stringformat:"i" %}selected{% endif %}>
-                                {{ t.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="subtopic" name="subtopic">
-                        <option value="">All Subtopics</option>
-                        {% for st in subtopics %}
-                            <option value="{{ st.id }}" {% if selected_subtopic == st.id|stringformat:"i" %}selected{% endif %}>
-                                {{ st.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="prompt_name" name="prompt_name">
-                        <option value="">All Prompts</option>
-                        {% for pn in prompt_names %}
-                            <option value="{{ pn }}" {% if selected_prompt_name == pn %}selected{% endif %}>
-                                {{ pn }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="sort_by">
-                        <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Newest First</option>
-                        <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Oldest First</option>
-                        <option value="likes_desc" {% if selected_sort == 'likes_desc' %}selected{% endif %}>Most Liked</option>
-                        <option value="likes_asc" {% if selected_sort == 'likes_asc' %}selected{% endif %}>Least Liked</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex gap-2 align-items-end">
-                    <button type="submit" class="btn custom-blue-btn flex-grow-1">Apply</button>
-                    <a href="{% url 'communitysheets' %}" class="btn btn-secondary flex-grow-1">Clear</a>
+                <div class="col-md-2 ms-auto d-flex gap-2 align-items-end">
+                     <button type="submit" class="btn custom-blue-btn btn-sm flex-grow-1 btn-smaller">Apply</button>
+                    <a href="{% url 'communitysheets' %}" class="btn btn-secondary btn-sm flex-grow-1 btn-smaller">Clear</a>
                 </div>
             </form>
         </div>
@@ -255,6 +261,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .review-link:hover small {
     color: #27374D!important;
+}
+.btn-smaller {
+    padding: 0.20rem 0.20rem;
 }
 </style>
 {% endblock %}

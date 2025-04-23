@@ -293,6 +293,10 @@ def communitysheets(request):
         published_sheets = published_sheets.annotate(total_likes=models.Count('likes')).order_by('-total_likes')
     elif sort_by == 'likes_asc':
         published_sheets = published_sheets.annotate(total_likes=models.Count('likes')).order_by('total_likes')
+    elif sort_by == 'rating_desc':
+        published_sheets = published_sheets.annotate(avg_rating=models.Avg('reviews__rating')).order_by('-avg_rating')
+    elif sort_by == 'rating_asc':
+        published_sheets = published_sheets.annotate(avg_rating=models.Avg('reviews__rating')).order_by('avg_rating')
     
     # Get all available options for filters
     grade_levels = GradeLevel.objects.all()
