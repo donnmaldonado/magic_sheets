@@ -42,17 +42,17 @@ class Prompt(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False)
     text = models.TextField(blank=False, null=False)
 
+    def __str__(self):
+        return self.name
 
 def worksheet_upload_path(instance, filename):
     # Generate filename based only on instance data
     base_filename = f"worksheet_{instance.id}_{instance.created_at.strftime('%Y%m%d_%H%M%S')}"
-    
     # Determine extension based on field name rather than original filename
     if 'pdf' in filename:
         ext = 'pdf'
     else:
         ext = 'docx'
-    
     return f'worksheets/{instance.user.id}/{base_filename}.{ext}'
 
 class Sheet(models.Model):

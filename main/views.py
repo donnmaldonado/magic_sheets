@@ -6,7 +6,7 @@ from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, Grad
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .worksheet_utils.file_utils import create_sheet as generate_worksheet_files, create_worksheet_files
+from .worksheet_utils.file_utils import create_sheet, create_worksheet_files
 from .worksheet_utils.generation import regenerate_worksheet_content
 from django.db import models
 # Create your views here.
@@ -75,13 +75,14 @@ def createsheet(request):
                 multiple_choice_count=int(form.cleaned_data['multiple_choice_questions']),
                 short_answer_count=int(form.cleaned_data['short_answer_questions']),
                 include_answer_key=form.cleaned_data['include_answer_sheet'],
-                prompt=Prompt.objects.get(type="GENERATE")
+                prompt = form.cleaned_data['prompt']
             )
             print(f"Sheet created with ID: {sheet.id}")  # Debug print
             
             # Generate the worksheet content and files
             try:
-                generate_worksheet_files(sheet)
+                #generate_worksheet_files(sheet)
+                create_sheet(sheet)
                 messages.success(request, 'Worksheet created successfully!')
             except Exception as e:
                 messages.error(request, f'Error generating worksheet: {str(e)}')
@@ -107,39 +108,6 @@ def get_subtopics(request):
     subtopics = SubTopic.objects.filter(topic_id=topic_id)
     return JsonResponse(list(subtopics.values('id', 'name')), safe=False)
 
-# Create sheet view and function
-@login_required
-def create_sheet(request):
-    if request.method == 'POST':
-        print("Form submitted")  # Debug print
-        form = SheetCreationForm(request.POST)
-        if form.is_valid():
-            print("Form is valid")  # Debug print
-            is_published = form.cleaned_data['published']
-            # Create the sheet
-            sheet = Sheet.objects.create(
-                creator=request.user,
-                title=form.cleaned_data['title'],
-                published=is_published,
-                grade_level=form.cleaned_data['grade_level'],
-                subject=form.cleaned_data['subject'],
-                topic=form.cleaned_data['topic'],
-                subtopic=form.cleaned_data['subtopic'],
-                true_false_count=int(form.cleaned_data['true_false_questions']),
-                fill_blank_count=int(form.cleaned_data['fill_blank_questions']),
-                multiple_choice_count=int(form.cleaned_data['multiple_choice_questions']),
-                short_answer_count=int(form.cleaned_data['short_answer_questions']),
-                include_answer_sheet=form.cleaned_data['include_answer_sheet']
-            )
-            print(f"Sheet created with ID: {sheet.id}")  # Debug print
-            return redirect('view_worksheet', sheet_id=sheet.id)
-        else:
-            print("Form errors:", form.errors)  # Debug print
-    else:
-        form = SheetCreationForm()
-    
-    return render(request, 'create_sheet.html', {'form': form})
-
 #View worksheet view 
 @login_required
 def viewsheet(request, sheet_id):
@@ -155,7 +123,7 @@ def viewsheet(request, sheet_id):
     is_liked = LikedSheet.objects.filter(user=request.user, sheet=sheet).exists()
     
     # Get all regenerate prompts for the dropdown
-    regenerate_prompts = Prompt.objects.filter(type='REGENERATE')
+    regenerate_prompts = Prompt.objects.filter(type='GENERATE')
 
     # Get reviews for the sheet
     reviews = Review.objects.filter(sheet=sheet).order_by('-created_at')

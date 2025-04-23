@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Sheet, GradeLevel, Subject, Topic, SubTopic
+from .models import Sheet, GradeLevel, Subject, Topic, SubTopic, Prompt
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(
         required=True,
@@ -58,6 +58,11 @@ class SheetCreationForm(forms.Form):
     )
     subtopic = forms.ModelChoiceField(
         queryset=SubTopic.objects.all(),  # Changed from none() to all()
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    prompt = forms.ModelChoiceField(
+        queryset=Prompt.objects.filter(type="GENERATE"),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     NUMBER_CHOICES = [(i, str(i)) for i in range(26)]  # 0 to 25

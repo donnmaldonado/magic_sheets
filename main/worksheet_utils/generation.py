@@ -12,8 +12,11 @@ def generate_worksheet_content(sheet):
     # OPENAI API KEY
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    # Get GENERATE prompt from database
-    prompt = Prompt.objects.get(type="GENERATE").text
+    # If the prompt is not General Use, add it to the prompt
+    prompt = sheet.prompt.text
+    if sheet.prompt.name != "General Use":
+        prompt = Prompt.objects.get(name="General Use").text + "\n" + prompt
+
     specifications = f"""
     Subject: {sheet.subject.name}
     Grade Level: {sheet.grade_level.name}
