@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="text-center mb-4 page-title">Community Worksheets</h1>
+    <h1 class="text-center mb-4 page-title">Community Sheets</h1>
     
     <!-- Filter Form -->
     <div class="card mb-4">
@@ -93,7 +93,9 @@
                                 <p class="mb-1">
                                     <strong>Grade:</strong> {{ sheet.grade_level.name }}<br>
                                     <strong>Subject:</strong> {{ sheet.subject.name }}<br>
-                                    <strong>Topic:</strong> {{ sheet.topic.name }}
+                                    <strong>Topic:</strong> {{ sheet.topic.name }}<br>
+                                    <strong>Subtopic:</strong> {{ sheet.sub_topic.name }}<br>
+                                    <strong>Type:</strong> {{ sheet.prompt.name }}
                                 </p>
                                 <div class="d-flex justify-content-between align-items-start mt-3">
                                     <small class="text-muted">
