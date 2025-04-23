@@ -51,6 +51,16 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <select class="form-select" id="prompt_name" name="prompt_name">
+                        <option value="">All Prompts</option>
+                        {% for pn in prompt_names %}
+                            <option value="{{ pn }}" {% if selected_prompt_name == pn %}selected{% endif %}>
+                                {{ pn }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <select class="form-select" name="sort_by">
                         <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Newest First</option>
                         <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Oldest First</option>

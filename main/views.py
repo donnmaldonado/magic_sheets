@@ -269,6 +269,7 @@ def communitysheets(request):
     subject = request.GET.get('subject')
     topic = request.GET.get('topic')
     subtopic = request.GET.get('subtopic')
+    prompt_name = request.GET.get('prompt_name')
     sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
     
     # Apply filters if they exist
@@ -280,6 +281,8 @@ def communitysheets(request):
         published_sheets = published_sheets.filter(topic_id=topic)
     if subtopic:
         published_sheets = published_sheets.filter(sub_topic_id=subtopic)
+    if prompt_name:
+        published_sheets = published_sheets.filter(prompt__name=prompt_name)
     
     # Apply sorting
     if sort_by == 'date_desc':
@@ -296,6 +299,7 @@ def communitysheets(request):
     subjects = Subject.objects.all()
     topics = Topic.objects.all()
     subtopics = SubTopic.objects.all()
+    prompt_names = Prompt.objects.filter(type="GENERATE").values_list('name', flat=True).distinct()
     
     # Add is_saved information and average rating to each sheet
     if request.user.is_authenticated:
@@ -322,10 +326,12 @@ def communitysheets(request):
         'subjects': subjects,
         'topics': topics,
         'subtopics': subtopics,
+        'prompt_names': prompt_names,
         'selected_grade': grade_level,
         'selected_subject': subject,
         'selected_topic': topic,
         'selected_subtopic': subtopic,
+        'selected_prompt_name': prompt_name,
         'selected_sort': sort_by,
     }
     return render(request, 'communitysheets.html', context)
