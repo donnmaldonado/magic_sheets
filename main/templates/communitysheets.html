@@ -91,6 +91,7 @@
                                                     {% for i in "12345" %}
                                                         <i class="fas fa-star {% if i|add:'0' <= sheet.avg_rating %}text-warning{% else %}text-muted{% endif %}"></i>
                                                     {% endfor %}
+                                                    <small class="ms-1 text-muted">({{ sheet.review_count }})</small>
                                                 </div>
                                             </a>
                                         {% else %}

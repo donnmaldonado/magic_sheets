@@ -337,12 +337,16 @@ def communitysheets(request):
             # Calculate average rating
             avg_rating = sheet.reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
             sheet.avg_rating = round(avg_rating) if avg_rating else None
+            # Calculate review count
+            sheet.review_count = sheet.reviews.count()
     else:
         for sheet in published_sheets:
             sheet.is_saved = False
             # Calculate average rating
             avg_rating = sheet.reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
             sheet.avg_rating = round(avg_rating) if avg_rating else None
+            # Calculate review count
+            sheet.review_count = sheet.reviews.count()
     
     context = {
         'published_sheets': published_sheets,
