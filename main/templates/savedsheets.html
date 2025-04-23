@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+   Saved Sheets
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <h1 class="text-center mb-4">Saved Sheets</h1>
@@ -57,7 +61,7 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-flex gap-2 align-items-end">
-                    <button type="submit" class="btn btn-primary flex-grow-1">Apply</button>
+                    <button type="submit" class="btn custom-blue-btn flex-grow-1">Apply</button>
                     <a href="{% url 'savedsheets' %}" class="btn btn-secondary flex-grow-1">Clear</a>
                 </div>
             </form>
