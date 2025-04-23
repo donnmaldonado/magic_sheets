@@ -329,14 +329,20 @@ def communitysheets(request):
     topics = Topic.objects.all()
     subtopics = SubTopic.objects.all()
     
-    # Add is_saved information to each sheet
+    # Add is_saved information and average rating to each sheet
     if request.user.is_authenticated:
         saved_sheet_ids = set(SavedSheet.objects.filter(user=request.user).values_list('sheet_id', flat=True))
         for sheet in published_sheets:
             sheet.is_saved = sheet.id in saved_sheet_ids
+            # Calculate average rating
+            avg_rating = sheet.reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+            sheet.avg_rating = round(avg_rating) if avg_rating else None
     else:
         for sheet in published_sheets:
             sheet.is_saved = False
+            # Calculate average rating
+            avg_rating = sheet.reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+            sheet.avg_rating = round(avg_rating) if avg_rating else None
     
     context = {
         'published_sheets': published_sheets,

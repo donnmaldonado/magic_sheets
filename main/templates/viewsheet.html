@@ -145,7 +145,7 @@
         <div class="col-md-10">
             <div class="card">
                 <div class="card-body">
-                    <h3 class="card-title">Reviews</h3>
+                    <h3 class="card-title" id="reviews">Reviews</h3>
                     
                     <!-- Review Form -->
                     {% if request.user.is_authenticated %}
@@ -268,6 +268,36 @@ document.getElementById('saveBtn').addEventListener('click', function() {
     .then(data => {
         button.textContent = data.saved ? 'Unsave' : 'Save';
     });
+});
+
+// Scroll to reviews section if URL has #reviews
+function scrollToReviews() {
+    const reviewsSection = document.getElementById('reviews');
+    if (reviewsSection) {
+        const offset = 100; // Adjust this value based on your header height
+        const elementPosition = reviewsSection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
+
+// Try scrolling when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash === '#reviews') {
+        // Wait a bit for all content to load
+        setTimeout(scrollToReviews, 500);
+    }
+});
+
+// Also try scrolling when the page is fully loaded
+window.addEventListener('load', function() {
+    if (window.location.hash === '#reviews') {
+        scrollToReviews();
+    }
 });
 </script>
 {% endblock %}
