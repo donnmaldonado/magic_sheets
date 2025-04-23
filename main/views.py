@@ -123,7 +123,7 @@ def viewsheet(request, sheet_id):
     is_liked = LikedSheet.objects.filter(user=request.user, sheet=sheet).exists()
     
     # Get all regenerate prompts for the dropdown
-    regenerate_prompts = Prompt.objects.filter(type='GENERATE')
+    regenerate_prompts = Prompt.objects.all()
 
     # Get reviews for the sheet
     reviews = Review.objects.filter(sheet=sheet).order_by('-created_at')

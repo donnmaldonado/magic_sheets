@@ -64,10 +64,11 @@ def regenerate_worksheet_content(sheet, prompt):
     # Get the content of the worksheet
     content = sheet.content
 
-    # Get the prompt for the worksheet
-    sheet.prompt = prompt
+    # Replace prompt associated with the worksheet if it is not General Use or Corrective
+    if prompt.name not in ["General Use", "Corrective"]:
+        sheet.prompt = prompt
     sheet.save()
-
+    print(sheet.prompt.name)
     # Get the specifications for the worksheet
     specifications = "Use the following instruction as a guide to regenerate the worksheet: " + prompt.text
     try:
