@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm
-from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, GradeLevel, Subject
+from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm, ReviewForm
+from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, GradeLevel, Subject, Review
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -157,12 +157,48 @@ def viewsheet(request, sheet_id):
     # Get all regenerate prompts for the dropdown
     regenerate_prompts = Prompt.objects.filter(type='REGENERATE')
 
+    # Get reviews for the sheet
+    reviews = Review.objects.filter(sheet=sheet).order_by('-created_at')
+    
+    # Check if user has already reviewed this sheet
+    user_review = None
+    if request.user.is_authenticated:
+        user_review = Review.objects.filter(user=request.user, sheet=sheet).first()
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            rating = int(form.cleaned_data['rating'])
+            comment = form.cleaned_data['comment']
+            
+            # Update existing review or create new one
+            if user_review:
+                user_review.rating = rating
+                print(user_review.rating)
+                user_review.comment = comment
+                user_review.save()
+                messages.success(request, 'Your review has been updated!')
+            else:
+                Review.objects.create(
+                    user=request.user,
+                    sheet=sheet,
+                    rating=rating,
+                    comment=comment
+                )
+                messages.success(request, 'Thank you for your review!')
+            return redirect('viewsheet', sheet_id=sheet_id)
+    else:
+        form = ReviewForm()
+
     context = {
         'sheet': sheet,
         'is_creator': sheet.user == request.user,
         'is_saved': is_saved,
         'is_liked': is_liked,
-        'regenerate_prompts': regenerate_prompts
+        'regenerate_prompts': regenerate_prompts,
+        'reviews': reviews,
+        'user_review': user_review,
+        'review_form': form
     }
     
     return render(request, 'viewsheet.html', context)

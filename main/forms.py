@@ -151,3 +151,14 @@ class SheetCreationForm(forms.Form):
             # For initial form load, set empty querysets
             self.fields['topic'].queryset = Topic.objects.none()
             self.fields['subtopic'].queryset = SubTopic.objects.none()
+
+class ReviewForm(forms.Form):
+    rating = forms.ChoiceField(
+        choices=[(i, i) for i in range(1, 6)],
+        widget=forms.RadioSelect(attrs={'class': 'star-rating'}),
+        required=True
+    )
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False
+    )

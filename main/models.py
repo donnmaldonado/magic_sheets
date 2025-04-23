@@ -95,4 +95,15 @@ class LikedSheet(models.Model):
 
     class Meta:
         unique_together = ('user', 'sheet') # Prevent duplicate likes
+
+class Review(models.Model):
+    id = models.AutoField(primary_key=True, blank=False, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name='reviews', blank=False, null=False)
+    rating = models.IntegerField(blank=False, null=False, choices=[(i, i) for i in range(1, 6)])
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=False, null=False)
+
+    class Meta:
+        unique_together = ('user', 'sheet') # Prevent duplicate reviews
     
