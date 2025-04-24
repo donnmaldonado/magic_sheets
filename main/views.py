@@ -212,12 +212,13 @@ def copy_sheet(request, sheet_id):
     
     if request.method == 'POST':
         new_title = request.POST.get('title', f"{original_sheet.title} (Copy)")
+        published = request.POST.get('published') == 'true'  # Convert string 'true'/'false' to boolean
         
         # Create a copy of the sheet
         new_sheet = Sheet.objects.create(
             user=request.user,
             title=new_title,
-            published=False,  # New copies are private by default
+            published=published,  # Use the boolean value
             grade_level=original_sheet.grade_level,
             subject=original_sheet.subject,
             topic=original_sheet.topic,
