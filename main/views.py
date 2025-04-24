@@ -207,13 +207,45 @@ def toggle_save(request, sheet_id):
     })
 
 @login_required
+def copy_sheet(request, sheet_id):
+    original_sheet = get_object_or_404(Sheet, id=sheet_id)
+    
+    if request.method == 'POST':
+        new_title = request.POST.get('title', f"{original_sheet.title} (Copy)")
+        
+        # Create a copy of the sheet
+        new_sheet = Sheet.objects.create(
+            user=request.user,
+            title=new_title,
+            published=False,  # New copies are private by default
+            grade_level=original_sheet.grade_level,
+            subject=original_sheet.subject,
+            topic=original_sheet.topic,
+            sub_topic=original_sheet.sub_topic,
+            true_false_count=original_sheet.true_false_count,
+            fill_in_the_blank_count=original_sheet.fill_in_the_blank_count,
+            multiple_choice_count=original_sheet.multiple_choice_count,
+            short_answer_count=original_sheet.short_answer_count,
+            include_answer_key=original_sheet.include_answer_key,
+            prompt=original_sheet.prompt,
+            content=original_sheet.content
+        )
+        
+        # Generate the worksheet files for the new sheet
+        create_worksheet_files(new_sheet)
+        
+        messages.success(request, 'Worksheet copied successfully!')
+        return redirect('viewsheet', sheet_id=new_sheet.id)
+    
+    return render(request, 'copy_sheet.html', {'sheet': original_sheet})
+
+@login_required
 def editsheet(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
     
-    # Only allow the creator to edit the sheet
+    # If user is not the creator, redirect to copy sheet
     if sheet.user != request.user:
-        messages.error(request, 'You do not have permission to edit this worksheet.')
-        return redirect('viewsheet', sheet_id=sheet_id)
+        return redirect('copy_sheet', sheet_id=sheet_id)
     
     if request.method == 'POST':
         new_content = request.POST.get('content', '')
@@ -233,32 +265,35 @@ def editsheet(request, sheet_id):
     
     return render(request, 'editsheet.html', context)
 
-@login_required
-def regenerate_sheet(request, sheet_id):
-    sheet = get_object_or_404(Sheet, id=sheet_id)
+# @login_required
+# def regenerate_sheet(request, sheet_id):
+#     sheet = get_object_or_404(Sheet, id=sheet_id)
     
-    # Only allow the creator to regenerate
-    if sheet.user != request.user:
-        messages.error(request, 'You do not have permission to regenerate this worksheet.')
-        return redirect('viewsheet', sheet_id=sheet_id)
+#     # Only allow the creator to regenerate
+#     if sheet.user != request.user:
+#         messages.error(request, 'You do not have permission to regenerate this worksheet.')
+#         return redirect('viewsheet', sheet_id=sheet_id)
     
-    if request.method == 'POST':
-        prompt_id = request.POST.get('prompt_id')
-        if prompt_id:
-            try:
-                # Update the sheet's prompt
-                sheet.prompt = Prompt.objects.get(id=prompt_id)
-                # Regenerate the content and files
-                sheet.content = regenerate_worksheet_content(sheet, Prompt.objects.get(id=prompt_id))
-                sheet.save()
-                create_worksheet_files(sheet)
-                messages.success(request, 'Worksheet regenerated successfully!')
-            except Exception as e:
-                messages.error(request, f'Error regenerating worksheet: {str(e)}')
-        else:
-            messages.warning(request, 'Please select a regeneration option.')
+#     if request.method == 'POST':
+#         prompt_id = request.POST.get('prompt_id')
+#         if prompt_id:
+#             try:
+#                 # Update the sheet's prompt
+#                 sheet.prompt = Prompt.objects.get(id=prompt_id)
+#                 # Regenerate the content and files
+#                 sheet.content = regenerate_worksheet_content(sheet, Prompt.objects.get(id=prompt_id))
+#                 sheet.save()
+#                 create_worksheet_files(sheet)
+#                 messages.success(request, 'Worksheet regenerated successfully!')
+#             except Exception as e:
+#                 messages.error(request, f'Error regenerating worksheet: {str(e)}')
+#         else:
+#             messages.warning(request, 'Please select a regeneration option.')
     
-    return redirect('viewsheet', sheet_id=sheet_id)
+#     return redirect('viewsheet', sheet_id=sheet_id)
+
+def regeneratesheet(request, sheet_id):
+    return render(request, 'regenerate.html')
 
 def communitysheets(request):
     # Get all published sheets ordered by creation date (newest first)

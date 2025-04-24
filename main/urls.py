@@ -14,6 +14,7 @@ urlpatterns = [
     path('sheet/<int:sheet_id>/toggle-save/', views.toggle_save, name='toggle_save'),
     path('savedsheets/', views.savedsheets, name='savedsheets'),
     path('editsheet/<int:sheet_id>/', views.editsheet, name='editsheet'),
-    path('regenerate/<int:sheet_id>/', views.regenerate_sheet, name='regenerate_sheet'),
+    path('regeneratesheet/<int:sheet_id>/', views.regeneratesheet, name='regeneratesheet'),
     path('communitysheets/', views.communitysheets, name='communitysheets'),
+    path('copy_sheet/<int:sheet_id>/', views.copy_sheet, name='copy_sheet'),
 ]

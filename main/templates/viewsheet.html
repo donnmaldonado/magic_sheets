@@ -70,11 +70,9 @@
                                 </ul>
                             </div>
                             <div class="like-download-buttons mt-5 d-flex gap-2">
-                                {% if request.user != sheet.user %}
                                     <button id="saveBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
                                         {% if is_saved %}Unsave{% else %}Save{% endif %}
                                     </button>
-                                {% endif %}
                                 {% if is_creator or sheet.published %}
                                     <button id="likeBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
                                         <i class="fa-solid fa-thumbs-up"></i>
@@ -91,26 +89,13 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <div class="col d-flex gap-2">
-                            {% if is_creator %}
-                            <form method="POST" action="{% url 'regenerate_sheet' sheet.id %}" class="d-flex gap-2">
-                                {% csrf_token %}
-                                <button type="submit" class="btn custom-blue-btn btn-sm">
-                                    Regenerate
-                                </button>
-                                <select name="prompt_id" class="form-select form-select-sm" style="width: auto;">
-                                    <option value="">Select Regeneration Option</option>
-                                    {% for prompt in regenerate_prompts %}
-                                    <option value="{{ prompt.id }}">{{ prompt.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </form>
-                            {% endif %}
-                            {% if is_creator %}
-                            <a href="{% url 'editsheet' sheet.id %}" class="btn custom-blue-btn btn-sm ms-auto">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'editsheet' sheet.id %}" class="btn custom-blue-btn btn-sm" style="width: 49px;">
                                 Edit
                             </a>
-                            {% endif %}
+                            <a href="{% url 'regeneratesheet' sheet.id %}" class="btn custom-blue-btn btn-sm">
+                                Regenerate
+                            </a>
                         </div>
                     </div>
                     <div class="worksheet-preview">
@@ -121,15 +106,9 @@
                                 </div>
                             </div>
                         {% else %}
-                            {% if is_creator %}
-                                <div class="alert alert-info">
-                                    Your worksheet is being generated...
-                                </div>
-                            {% else %}
-                                <div class="alert alert-warning">
-                                    This worksheet hasn't been generated yet.
-                                </div>
-                            {% endif %}
+                            <div class="alert alert-info">
+                                There was an error fetching your worksheet. Please try again.
+                            </div>
                         {% endif %}
                     </div>
         
