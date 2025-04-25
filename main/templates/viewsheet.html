@@ -181,6 +181,15 @@
                             </div>
                         </div>
                     {% endif %}
+                    {% if sheet.versions.exists or sheet.parent_sheet %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <a href="{% url 'worksheet_hierarchy' sheet.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-sitemap"></i> View Worksheet Hierarchy
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
         
                 </div>
             </div>
@@ -282,7 +291,7 @@
 // Like button
 document.getElementById('likeBtn').addEventListener('click', function() {
     const sheetId = this.dataset.sheetId;
-    const likeCount = this.querySelector('.like-count');
+    const likeCount = document.getElementById('likeCount');
     const icon = this.querySelector('i');
     
     fetch(`/sheet/${sheetId}/toggle-like/`, {

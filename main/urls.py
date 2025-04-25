@@ -18,4 +18,5 @@ urlpatterns = [
     path('communitysheets/', views.communitysheets, name='communitysheets'),
     path('copy_sheet/<int:sheet_id>/', views.copy_sheet, name='copy_sheet'),
     path('mysheets/', views.mysheets, name='mysheets'),
+    path('sheet/<int:sheet_id>/hierarchy/', views.worksheet_hierarchy, name='worksheet_hierarchy'),
 ]

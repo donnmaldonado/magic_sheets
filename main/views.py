@@ -592,3 +592,29 @@ def mysheets(request):
         'selected_sort': sort_by,
     }
     return render(request, 'mysheets.html', context)
+
+@login_required
+def worksheet_hierarchy(request, sheet_id):
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    
+    # Find the root sheet (original worksheet)
+    root_sheet = sheet
+    while root_sheet.parent_sheet:
+        root_sheet = root_sheet.parent_sheet
+    
+    # Get all versions of the worksheet
+    versions = Sheet.objects.filter(parent_sheet=root_sheet).order_by('version_number')
+    
+    # Get the current sheet's path in the tree
+    current_path = []
+    current = sheet
+    while current:
+        current_path.append(current.id)
+        current = current.parent_sheet
+    
+    return render(request, 'worksheet_hierarchy.html', {
+        'root_sheet': root_sheet,
+        'versions': versions,
+        'current_sheet_id': sheet_id,
+        'current_path': current_path
+    })

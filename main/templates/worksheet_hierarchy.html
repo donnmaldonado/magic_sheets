@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Worksheet Hierarchy</h2>
+                    
+                    <div class="worksheet-tree">
+                        {% if root_sheet %}
+                            <ul class="tree">
+                                <li>
+                                    <div class="tree-node {% if root_sheet.id == current_sheet_id %}current-sheet{% endif %}">
+                                        <div class="d-flex align-items-center">
+                                            {% if root_sheet.versions.exists %}
+                                                <button class="btn btn-link p-0 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#root-versions">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                            {% else %}
+                                                <span class="me-2" style="width: 20px;"></span>
+                                            {% endif %}
+                                            <span class="flex-grow-1">
+                                                <span class="fw-medium">{{ root_sheet.title }}</span>
+                                            </span>
+                                            <a href="{% url 'viewsheet' root_sheet.id %}" class="btn btn-sm btn-outline-primary ms-2">View</a>
+                                        </div>
+                                    </div>
+                                    {% if root_sheet.versions.exists %}
+                                        <div class="collapse show" id="root-versions">
+                                            <ul>
+                                                {% for version in root_sheet.versions.all %}
+                                                    <li>
+                                                        <div class="tree-node {% if version.id == current_sheet_id %}current-sheet{% endif %}">
+                                                            <div class="d-flex align-items-center">
+                                                                {% if version.versions.exists %}
+                                                                    <button class="btn btn-link p-0 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#version-{{ version.id }}">
+                                                                        <i class="fas fa-chevron-down"></i>
+                                                                    </button>
+                                                                {% else %}
+                                                                    <span class="me-2" style="width: 20px;"></span>
+                                                                {% endif %}
+                                                                <span class="flex-grow-1">
+                                                                    <span class="fw-medium">{{ version.title }}</span>
+                                                                </span>
+                                                                <a href="{% url 'viewsheet' version.id %}" class="btn btn-sm btn-outline-primary ms-2">View</a>
+                                                            </div>
+                                                        </div>
+                                                        {% if version.versions.exists %}
+                                                            <div class="collapse show" id="version-{{ version.id }}">
+                                                                <ul>
+                                                                    {% for subversion in version.versions.all %}
+                                                                        <li>
+                                                                            <div class="tree-node {% if subversion.id == current_sheet_id %}current-sheet{% endif %}">
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <span class="me-2" style="width: 20px;"></span>
+                                                                                    <span class="flex-grow-1">
+                                                                                        <span class="fw-medium">{{ subversion.title }}</span>
+                                                                                    </span>
+                                                                                    <a href="{% url 'viewsheet' subversion.id %}" class="btn btn-sm btn-outline-primary ms-2">View</a>
+                                                                                </div>
+                                                                            </div>
+                                                                        </li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                        {% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        {% else %}
+                            <p class="text-center text-muted">No worksheet hierarchy found.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tree {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.tree-node {
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    margin: 4px 0;
+}
+
+.tree-node:hover {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+}
+
+.tree ul {
+    list-style-type: none;
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.tree li {
+    position: relative;
+}
+
+.current-sheet {
+    background-color: #e9ecef;
+    border-left: 3px solid #0d6efd;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-link {
+    color: #6c757d;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.btn-link:hover {
+    color: #0d6efd;
+}
+
+.fa-chevron-down {
+    transition: transform 0.2s ease;
+}
+
+.collapsed .fa-chevron-down {
+    transform: rotate(-90deg);
+}
+
+/* Ensure consistent button width */
+.btn-outline-primary {
+    min-width: 60px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+h2.card-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+</style>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for collapse buttons
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.toggle('collapsed');
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 
