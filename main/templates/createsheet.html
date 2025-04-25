@@ -46,7 +46,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Number of Questions by Type</label>
+                            <label class="form-label">Number of Questions</label>
                             <div class="row">
                                 <div class="col-md-3">
                                     <label for="{{ form.true_false_questions.id_for_label }}" class="form-label">True/False</label>
@@ -74,9 +74,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label d-block">Include Answer Sheet</label>
+                            <label class="form-label d-block">Include Answer Key</label>
                             <div class="btn-group" role="group">
-                                {% for radio in form.include_answer_sheet %}
+                                {% for radio in form.include_answer_key %}
                                     <div class="form-check form-check-inline">
                                         {{ radio.tag }}
                                         <label class="form-check-label" for="{{ radio.id_for_label }}">

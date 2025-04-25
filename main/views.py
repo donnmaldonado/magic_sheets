@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm, ReviewForm
+from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm, ReviewForm, RegenerateSheetForm
 from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, GradeLevel, Subject, Review
 from django.contrib import messages
 from django.http import JsonResponse
@@ -74,7 +74,7 @@ def createsheet(request):
                 fill_in_the_blank_count=int(form.cleaned_data['fill_blank_questions']),
                 multiple_choice_count=int(form.cleaned_data['multiple_choice_questions']),
                 short_answer_count=int(form.cleaned_data['short_answer_questions']),
-                include_answer_key=form.cleaned_data['include_answer_sheet'],
+                include_answer_key=form.cleaned_data['include_answer_key'],
                 prompt = form.cleaned_data['prompt']
             )
             print(f"Sheet created with ID: {sheet.id}")  # Debug print
@@ -266,35 +266,68 @@ def editsheet(request, sheet_id):
     
     return render(request, 'editsheet.html', context)
 
-# @login_required
-# def regenerate_sheet(request, sheet_id):
-#     sheet = get_object_or_404(Sheet, id=sheet_id)
-    
-#     # Only allow the creator to regenerate
-#     if sheet.user != request.user:
-#         messages.error(request, 'You do not have permission to regenerate this worksheet.')
-#         return redirect('viewsheet', sheet_id=sheet_id)
-    
-#     if request.method == 'POST':
-#         prompt_id = request.POST.get('prompt_id')
-#         if prompt_id:
-#             try:
-#                 # Update the sheet's prompt
-#                 sheet.prompt = Prompt.objects.get(id=prompt_id)
-#                 # Regenerate the content and files
-#                 sheet.content = regenerate_worksheet_content(sheet, Prompt.objects.get(id=prompt_id))
-#                 sheet.save()
-#                 create_worksheet_files(sheet)
-#                 messages.success(request, 'Worksheet regenerated successfully!')
-#             except Exception as e:
-#                 messages.error(request, f'Error regenerating worksheet: {str(e)}')
-#         else:
-#             messages.warning(request, 'Please select a regeneration option.')
-    
-#     return redirect('viewsheet', sheet_id=sheet_id)
-
+@login_required
 def regeneratesheet(request, sheet_id):
-    return render(request, 'regenerate.html')
+    original_sheet = get_object_or_404(Sheet, id=sheet_id)
+    
+    if request.method == 'POST':
+        form = RegenerateSheetForm(request.POST, current_counts={
+            'true_false': original_sheet.true_false_count,
+            'fill_blank': original_sheet.fill_in_the_blank_count,
+            'multiple_choice': original_sheet.multiple_choice_count,
+            'short_answer': original_sheet.short_answer_count
+        })
+        if form.is_valid():
+            # Create a new sheet based on the original
+            new_sheet = Sheet.objects.create(
+                user=request.user,
+                title=form.cleaned_data['title'],
+                published=form.cleaned_data['published'],
+                grade_level=original_sheet.grade_level,
+                subject=original_sheet.subject,
+                topic=original_sheet.topic,
+                sub_topic=original_sheet.sub_topic,
+                # Add the new question counts to the original counts
+                true_false_count=original_sheet.true_false_count + int(form.cleaned_data['true_false_questions']),
+                fill_in_the_blank_count=original_sheet.fill_in_the_blank_count + int(form.cleaned_data['fill_blank_questions']),
+                multiple_choice_count=original_sheet.multiple_choice_count + int(form.cleaned_data['multiple_choice_questions']),
+                short_answer_count=original_sheet.short_answer_count + int(form.cleaned_data['short_answer_questions']),
+                include_answer_key=form.cleaned_data['include_answer_key'],
+                prompt=original_sheet.prompt,
+                content=original_sheet.content 
+            )
+            
+            try:
+                additional_questions = {
+                    'true_false': int(form.cleaned_data['true_false_questions']),
+                    'fill_blank': int(form.cleaned_data['fill_blank_questions']),
+                    'multiple_choice': int(form.cleaned_data['multiple_choice_questions']),
+                    'short_answer': int(form.cleaned_data['short_answer_questions'])
+                }
+                # Regenerate the content and create files
+                new_sheet.content = regenerate_worksheet_content(new_sheet, form.cleaned_data['prompt'], additional_questions) 
+                create_worksheet_files(new_sheet)
+                messages.success(request, 'Worksheet regenerated successfully!')
+                return redirect('viewsheet', sheet_id=new_sheet.id)
+            except Exception as e:
+                messages.error(request, f'Error regenerating worksheet: {str(e)}')
+                new_sheet.delete()  # Clean up the sheet if generation fails
+                return redirect('regeneratesheet', sheet_id=sheet_id)
+    else:
+        form = RegenerateSheetForm(initial={
+            'title': f"{original_sheet.title} (Regenerated)",
+            'include_answer_key': original_sheet.include_answer_key
+        }, current_counts={
+            'true_false': original_sheet.true_false_count,
+            'fill_blank': original_sheet.fill_in_the_blank_count,
+            'multiple_choice': original_sheet.multiple_choice_count,
+            'short_answer': original_sheet.short_answer_count
+        })
+    
+    return render(request, 'regenerate.html', {
+        'form': form,
+        'sheet': original_sheet
+    })
 
 def communitysheets(request):
     # Get all published sheets ordered by creation date (newest first)

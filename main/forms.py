@@ -103,7 +103,7 @@ class SheetCreationForm(forms.Form):
         label='Short Answer'
     )
     
-    include_answer_sheet = forms.BooleanField(
+    include_answer_key = forms.BooleanField(
         required=False,
         widget=forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
         initial=True
@@ -156,6 +156,91 @@ class SheetCreationForm(forms.Form):
             # For initial form load, set empty querysets
             self.fields['topic'].queryset = Topic.objects.none()
             self.fields['subtopic'].queryset = SubTopic.objects.none()
+
+class RegenerateSheetForm(forms.Form):
+    title = forms.CharField(
+        max_length=200,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    
+    prompt = forms.ModelChoiceField(
+        queryset=Prompt.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    # Store current counts as hidden fields
+    current_true_false = forms.IntegerField(widget=forms.HiddenInput())
+    current_fill_blank = forms.IntegerField(widget=forms.HiddenInput())
+    current_multiple_choice = forms.IntegerField(widget=forms.HiddenInput())
+    current_short_answer = forms.IntegerField(widget=forms.HiddenInput())
+    
+    # Additional questions fields with dynamic max value
+    NUMBER_CHOICES = [(i, str(i)) for i in range(26)]  # 0 to 25
+
+    true_false_questions = forms.ChoiceField(
+        choices=NUMBER_CHOICES,
+        initial='0',
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        }),
+        label='Additional True/False Questions'
+    )
+    
+    fill_blank_questions = forms.ChoiceField(
+        choices=NUMBER_CHOICES,
+        initial='0',
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        }),
+        label='Additional Fill in the Blank Questions'
+    )
+    
+    multiple_choice_questions = forms.ChoiceField(
+        choices=NUMBER_CHOICES,
+        initial='0',
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        }),
+        label='Additional Multiple Choice Questions'
+    )
+    
+    short_answer_questions = forms.ChoiceField(
+        choices=NUMBER_CHOICES,
+        initial='0',
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        }),
+        label='Additional Short Answer Questions'
+    )
+    
+    include_answer_key = forms.BooleanField(
+        required=False,
+        widget=forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
+        initial=True
+    )
+    published = forms.BooleanField(
+        required=False,
+        widget=forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
+        initial=True
+    )
+    
+    def __init__(self, *args, **kwargs):
+        current_counts = kwargs.pop('current_counts', None)
+        super().__init__(*args, **kwargs)
+        
+        if current_counts:
+            # Set initial values for current counts
+            self.fields['current_true_false'].initial = current_counts['true_false']
+            self.fields['current_fill_blank'].initial = current_counts['fill_blank']
+            self.fields['current_multiple_choice'].initial = current_counts['multiple_choice']
+            self.fields['current_short_answer'].initial = current_counts['short_answer']
+            
+            # Update the data-current attribute for each field
+            self.fields['true_false_questions'].widget.attrs['data-current'] = current_counts['true_false']
+            self.fields['fill_blank_questions'].widget.attrs['data-current'] = current_counts['fill_blank']
+            self.fields['multiple_choice_questions'].widget.attrs['data-current'] = current_counts['multiple_choice']
+            self.fields['short_answer_questions'].widget.attrs['data-current'] = current_counts['short_answer']
 
 class ReviewForm(forms.Form):
     rating = forms.ChoiceField(

@@ -1,6 +1,203 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Regenerate Worksheet</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Regenerate Worksheet</h2>
+                    <p class="card-text text-center mb-4">
+                        Customize your new worksheet by selecting a new prompt and adding additional questions.
+                    </p>
+                    
+                    <form method="POST" id="regenerateForm">
+                        {% csrf_token %}
+                        {{ form.current_true_false }}
+                        {{ form.current_fill_blank }}
+                        {{ form.current_multiple_choice }}
+                        {{ form.current_short_answer }}
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="{{ form.title.id_for_label }}">New Worksheet Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.title.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.prompt.id_for_label }}" class="form-label">Select Regeneration Prompt</label>
+                            {{ form.prompt }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Additional Questions</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="{{ form.true_false_questions.id_for_label }}" class="form-label">
+                                        True/False <span id="current-tf" class="text-muted">({{ form.current_true_false.value }})</span>
+                                    </label>
+                                    {{ form.true_false_questions }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.fill_blank_questions.id_for_label }}" class="form-label">
+                                        Fill in the Blank <span id="current-fb" class="text-muted">({{ form.current_fill_blank.value }})</span>
+                                    </label>
+                                    {{ form.fill_blank_questions }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.multiple_choice_questions.id_for_label }}" class="form-label">
+                                        Multiple Choice <span id="current-mc" class="text-muted">({{ form.current_multiple_choice.value }})</span>
+                                    </label>
+                                    {{ form.multiple_choice_questions }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.short_answer_questions.id_for_label }}" class="form-label">
+                                        Short Answer <span id="current-sa" class="text-muted">({{ form.current_short_answer.value }})</span>
+                                    </label>
+                                    {{ form.short_answer_questions }}
+                                </div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Total Additional Questions: <span id="totalQuestions">0</span>/25</small>
+                                <div id="questionLimitWarning" class="text-danger" style="display: none;">
+                                    Total questions cannot exceed 25
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Include Answer Key</label>
+                            <div class="btn-group" role="group">
+                                {% for radio in form.include_answer_key %}
+                                    <div class="form-check form-check-inline">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                            {{ radio.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Make this worksheet public?</label>
+                            <div class="published-options">
+                                {% for radio in form.published %}
+                                    <div class="form-check form-check-inline">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                            {{ radio.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn custom-blue-btn" id="regenerateBtn">Regenerate Worksheet</button>
+                            <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('regenerateForm');
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    const tfInput = document.getElementById('{{ form.true_false_questions.id_for_label }}');
+    const fbInput = document.getElementById('{{ form.fill_blank_questions.id_for_label }}');
+    const mcInput = document.getElementById('{{ form.multiple_choice_questions.id_for_label }}');
+    const saInput = document.getElementById('{{ form.short_answer_questions.id_for_label }}');
+    
+    const allInputs = [tfInput, fbInput, mcInput, saInput];
+    const maxQuestions = 25;
+    
+    // Update total count and dropdown options
+    function updateQuestionCount() {
+        let total = 0;
+        
+        // Calculate total from all inputs
+        allInputs.forEach(input => {
+            total += parseInt(input.value) || 0;
+        });
+        
+        // Update the total display
+        document.getElementById('totalQuestions').textContent = total;
+        
+        // Show warning if over limit
+        const warningElement = document.getElementById('questionLimitWarning');
+        if (total > maxQuestions) {
+            warningElement.style.display = 'block';
+            regenerateBtn.disabled = true;
+        } else {
+            warningElement.style.display = 'none';
+            regenerateBtn.disabled = false;
+        }
+
+        // Update max values for each dropdown
+        const remaining = maxQuestions - total;
+        allInputs.forEach(input => {
+            const currentVal = parseInt(input.value) || 0;
+            
+            // Clear existing options
+            while (input.firstChild) {
+                input.removeChild(input.firstChild);
+            }
+            
+            // Add options from 0 to (current value + remaining)
+            const maxForThis = currentVal + remaining;
+            for (let i = 0; i <= maxForThis; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                if (i === currentVal) {
+                    option.selected = true;
+                }
+                input.appendChild(option);
+            }
+        });
+    }
+    
+    // Event listeners for all input elements
+    allInputs.forEach(input => {
+        input.addEventListener('change', updateQuestionCount);
+    });
+    
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        console.log('Form submitted');
+        const total = Array.from(allInputs).reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+        if (total > maxQuestions) {
+            e.preventDefault();
+            console.log('Form submission prevented - total questions exceed limit');
+            return;
+        }
+        console.log('Form submission proceeding');
+        
+        // Ensure hidden fields are properly set
+        const currentTrueFalse = document.getElementById('{{ form.current_true_false.id_for_label }}');
+        const currentFillBlank = document.getElementById('{{ form.current_fill_blank.id_for_label }}');
+        const currentMultipleChoice = document.getElementById('{{ form.current_multiple_choice.id_for_label }}');
+        const currentShortAnswer = document.getElementById('{{ form.current_short_answer.id_for_label }}');
+        
+        if (!currentTrueFalse.value || !currentFillBlank.value || !currentMultipleChoice.value || !currentShortAnswer.value) {
+            console.log('Missing current count values');
+            e.preventDefault();
+            return;
+        }
+    });
+    
+    // Initialize on page load
+    updateQuestionCount();
+});
+</script>
+{% endblock %}
 {% endblock %}
 
