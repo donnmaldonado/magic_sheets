@@ -1,0 +1,28 @@
+<li>
+    <div class="tree-node {% if sheet.id == current_sheet_id %}current-sheet{% endif %}">
+        <div class="d-flex align-items-center">
+            {% if sheet.versions.exists %}
+                <button class="btn btn-link p-0 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#version-{{ sheet.id }}">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            {% else %}
+                <span class="me-2" style="width: 20px;"></span>
+            {% endif %}
+            <span class="flex-grow-1">
+                <span class="fw-medium">{{ sheet.title }}</span>
+            </span>
+            <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-sm btn-outline-primary ms-2">View</a>
+        </div>
+    </div>
+    {% if sheet.versions.exists %}
+        <div class="collapse show" id="version-{{ sheet.id }}">
+            <ul>
+                {% for version in sheet.versions.all %}
+                    {% with sheet=version %}
+                        {% include "worksheet_tree_node.html" %}
+                    {% endwith %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</li> 

@@ -279,8 +279,7 @@ def regeneratesheet(request, sheet_id):
             'short_answer': original_sheet.short_answer_count
         })
         if form.is_valid():
-            # Get the root sheet (original sheet or its parent)
-            root_sheet = original_sheet.parent_sheet if original_sheet.parent_sheet else original_sheet
+            root_sheet = original_sheet
             
             # Get the latest version number
             latest_version = Sheet.objects.filter(parent_sheet=root_sheet).order_by('-version_number').first()
@@ -602,9 +601,6 @@ def worksheet_hierarchy(request, sheet_id):
     while root_sheet.parent_sheet:
         root_sheet = root_sheet.parent_sheet
     
-    # Get all versions of the worksheet
-    versions = Sheet.objects.filter(parent_sheet=root_sheet).order_by('version_number')
-    
     # Get the current sheet's path in the tree
     current_path = []
     current = sheet
@@ -614,7 +610,6 @@ def worksheet_hierarchy(request, sheet_id):
     
     return render(request, 'worksheet_hierarchy.html', {
         'root_sheet': root_sheet,
-        'versions': versions,
         'current_sheet_id': sheet_id,
         'current_path': current_path
     })
