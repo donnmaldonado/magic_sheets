@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from .worksheet_utils.file_utils import create_sheet, create_worksheet_files
 from .worksheet_utils.generation import regenerate_worksheet_content
 from django.db import models
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 # Create your views here.
 
 def home(request):
@@ -340,6 +341,7 @@ def communitysheets(request):
     subtopic = request.GET.get('subtopic')
     prompt_name = request.GET.get('prompt_name')
     sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
+    page = request.GET.get('page', 1)  # Get current page number
     
     # Apply filters if they exist
     if grade_level:
@@ -393,8 +395,17 @@ def communitysheets(request):
             # Calculate review count
             sheet.review_count = sheet.reviews.count()
     
+    # Pagination
+    paginator = Paginator(published_sheets, 9)  # Show 9 sheets per page
+    try:
+        sheets = paginator.page(page)
+    except PageNotAnInteger:
+        sheets = paginator.page(1)
+    except EmptyPage:
+        sheets = paginator.page(paginator.num_pages)
+    
     context = {
-        'published_sheets': published_sheets,
+        'published_sheets': sheets,
         'grade_levels': grade_levels,
         'subjects': subjects,
         'topics': topics,
@@ -424,6 +435,7 @@ def savedsheets(request):
     subtopic = request.GET.get('subtopic')
     prompt_name = request.GET.get('prompt_name')
     sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
+    page = request.GET.get('page', 1)  # Get current page number
     
     # Apply filters if they exist
     if grade_level:
@@ -468,8 +480,17 @@ def savedsheets(request):
         # Calculate review count
         sheet.review_count = sheet.reviews.count()
     
+    # Pagination
+    paginator = Paginator(saved_sheets, 9)  # Show 9 sheets per page
+    try:
+        sheets = paginator.page(page)
+    except PageNotAnInteger:
+        sheets = paginator.page(1)
+    except EmptyPage:
+        sheets = paginator.page(paginator.num_pages)
+    
     context = {
-        'saved_sheets': saved_sheets,
+        'saved_sheets': sheets,
         'grade_levels': grade_levels,
         'subjects': subjects,
         'topics': topics,
@@ -496,6 +517,7 @@ def mysheets(request):
     subtopic = request.GET.get('subtopic')
     prompt_name = request.GET.get('prompt_name')
     sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
+    page = request.GET.get('page', 1)  # Get current page number
     
     # Apply filters if they exist
     if grade_level:
@@ -538,8 +560,17 @@ def mysheets(request):
         # Calculate review count
         sheet.review_count = sheet.reviews.count()
     
+    # Pagination
+    paginator = Paginator(my_sheets, 9)  # Show 9 sheets per page
+    try:
+        sheets = paginator.page(page)
+    except PageNotAnInteger:
+        sheets = paginator.page(1)
+    except EmptyPage:
+        sheets = paginator.page(paginator.num_pages)
+    
     context = {
-        'my_sheets': my_sheets,
+        'my_sheets': sheets,
         'grade_levels': grade_levels,
         'subjects': subjects,
         'topics': topics,

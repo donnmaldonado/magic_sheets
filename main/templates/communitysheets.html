@@ -137,6 +137,49 @@
                 </div>
             {% endfor %}
         </div>
+
+        <!-- Pagination -->
+        {% if published_sheets.paginator.num_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if published_sheets.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ published_sheets.previous_page_number }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in published_sheets.paginator.page_range %}
+                    {% if num == published_sheets.number %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > published_sheets.number|add:'-3' and num < published_sheets.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if published_sheets.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ published_sheets.next_page_number }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ published_sheets.paginator.num_pages }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
     {% else %}
         <div class="alert alert-info text-center">
             No published worksheets available yet. Be the first to create one!

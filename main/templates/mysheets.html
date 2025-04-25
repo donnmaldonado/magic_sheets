@@ -85,60 +85,109 @@
     </div>
     
     <!-- Sheets Grid -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for sheet in my_sheets %}
-        <div class="col">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">{{ sheet.title }}</h5>
-                    <div class="card-text">
-                        <p class="mb-1">
-                            <strong>Grade:</strong> {{ sheet.grade_level.name }}<br>
-                            <strong>Subject:</strong> {{ sheet.subject.name }}<br>
-                            <strong>Topic:</strong> {{ sheet.topic.name }}<br>
-                            <strong>Subtopic:</strong> {{ sheet.sub_topic.name }}<br>
-                            <strong>Type:</strong> {{ sheet.prompt.name }}<br>
-                        </p>
-                        <div class="d-flex justify-content-between align-items-start mt-3">
-                            <small class="text-muted">
-                                By {{ sheet.user.username }}<br>
-                                {{ sheet.created_at|date:"M d, Y" }}
-                            </small>
-                            <div class="text-end mt-auto">
-                                {% if sheet.avg_rating %}
-                                    <a href="{% url 'viewsheet' sheet.id %}#reviews" class="text-decoration-none review-link">
-                                        <div class="star-rating-display">
-                                            {% for i in "12345" %}
-                                                <i class="fas fa-star {% if i|add:'0' <= sheet.avg_rating %}text-warning{% else %}text-muted{% endif %}"></i>
-                                            {% endfor %}
-                                            <small class="ms-1 text-muted">({{ sheet.review_count }})</small>
-                                        </div>
-                                    </a>
-                                {% else %}
-                                    <a href="{% url 'viewsheet' sheet.id %}#reviews" class="text-decoration-none review-link">
-                                        <small class="text-muted">No reviews yet</small>
-                                    </a>
-                                {% endif %}
+    {% if my_sheets %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for sheet in my_sheets %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ sheet.title }}</h5>
+                            <div class="card-text">
+                                <p class="mb-1">
+                                    <strong>Grade:</strong> {{ sheet.grade_level.name }}<br>
+                                    <strong>Subject:</strong> {{ sheet.subject.name }}<br>
+                                    <strong>Topic:</strong> {{ sheet.topic.name }}<br>
+                                    <strong>Subtopic:</strong> {{ sheet.sub_topic.name }}<br>
+                                    <strong>Type:</strong> {{ sheet.prompt.name }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-start mt-3">
+                                    <small class="text-muted">
+                                        By {{ sheet.user.username }}<br>
+                                        {{ sheet.created_at|date:"M d, Y" }}
+                                    </small>
+                                    <div class="text-end mt-auto">
+                                        {% if sheet.avg_rating %}
+                                            <a href="{% url 'viewsheet' sheet.id %}#reviews" class="text-decoration-none review-link">
+                                                <div class="star-rating-display">
+                                                    {% for i in "12345" %}
+                                                        <i class="fas fa-star {% if i|add:'0' <= sheet.avg_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                    {% endfor %}
+                                                    <small class="ms-1 text-muted">({{ sheet.review_count }})</small>
+                                                </div>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'viewsheet' sheet.id %}#reviews" class="text-decoration-none review-link">
+                                                <small class="text-muted">No reviews yet</small>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex gap-2">
+                                <button id="likeBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
+                                    <i class="fa-solid fa-thumbs-up"></i>
+                                    <span class="like-count">{{ sheet.like_count }}</span>
+                                </button>
+                                <button id="saveBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}" data-is-saved="{{ sheet.is_saved|lower }}">
+                                    {% if sheet.is_saved %}Unsave{% else %}Save{% endif %}
+                                </button>
+                                <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-primary custom-blue-btn flex-fill">View</a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-transparent">
-                    <div class="d-flex gap-2">
-                        <button id="likeBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
-                            <i class="fa-solid fa-thumbs-up"></i>
-                            <span class="like-count">{{ sheet.like_count }}</span>
-                        </button>
-                        <button id="saveBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}" data-is-saved="{{ sheet.is_saved|lower }}">
-                            {% if sheet.is_saved %}Unsave{% else %}Save{% endif %}
-                        </button>
-                        <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-primary custom-blue-btn flex-fill">View</a>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+
+        <!-- Pagination -->
+        {% if my_sheets.paginator.num_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if my_sheets.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ my_sheets.previous_page_number }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in my_sheets.paginator.page_range %}
+                    {% if num == my_sheets.number %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > my_sheets.number|add:'-3' and num < my_sheets.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if my_sheets.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ my_sheets.next_page_number }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ my_sheets.paginator.num_pages }}{% if selected_grade %}&grade_level={{ selected_grade }}{% endif %}{% if selected_subject %}&subject={{ selected_subject }}{% endif %}{% if selected_topic %}&topic={{ selected_topic }}{% endif %}{% if selected_subtopic %}&subtopic={{ selected_subtopic }}{% endif %}{% if selected_prompt_name %}&prompt_name={{ selected_prompt_name }}{% endif %}{% if selected_sort %}&sort_by={{ selected_sort }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info text-center">
+            You haven't created any worksheets yet. Click the "Create Sheet" button to get started!
+        </div>
+    {% endif %}
 </div>
 
 {% block javascript %}
@@ -222,25 +271,26 @@
                 });
             });
         });
+
         // Save button functionality
-    document.querySelectorAll('#saveBtn').forEach(button => {
-        button.addEventListener('click', function() {
-            const sheetId = this.dataset.sheetId;
-            const button = this;
-            
-            fetch(`/sheet/${sheetId}/toggle-save/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                button.textContent = data.saved ? 'Unsave' : 'Save';
-                button.dataset.isSaved = data.saved;
+        document.querySelectorAll('#saveBtn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sheetId = this.dataset.sheetId;
+                const button = this;
+                
+                fetch(`/sheet/${sheetId}/toggle-save/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    button.textContent = data.saved ? 'Unsave' : 'Save';
+                    button.dataset.isSaved = data.saved;
+                });
             });
         });
-    });
     });
 </script>
 {% endblock %}
