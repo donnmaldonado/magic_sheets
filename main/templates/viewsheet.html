@@ -28,6 +28,9 @@
                                         <strong>Subtopic:</strong> {{ sheet.sub_topic.name }}
                                     </li>
                                     <li class="list-group-item">
+                                        <strong>Type:</strong> {{ sheet.prompt.name }}
+                                    </li>
+                                    <li class="list-group-item">
                                         <strong>Creator:</strong> {{ sheet.user.username }}
                                     </li>
                                     <li class="list-group-item">
@@ -44,7 +47,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 d-flex flex-column">
                             <div class="question-breakdown mt-4">
                                 <h4>Question Breakdown:</h4>
                                 <ul class="list-group">
@@ -69,10 +72,10 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="like-download-buttons mt-5 d-flex gap-2">
-                                    <button id="saveBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
-                                        {% if is_saved %}Unsave{% else %}Save{% endif %}
-                                    </button>
+                            <div class="like-download-buttons mt-auto d-flex gap-2">
+                                <button id="saveBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
+                                    {% if is_saved %}Unsave{% else %}Save{% endif %}
+                                </button>
                                 {% if is_creator or sheet.published %}
                                     <button id="likeBtn" class="btn custom-blue-btn btn-sm flex-fill" data-sheet-id="{{ sheet.id }}">
                                         <i class="fa-solid fa-thumbs-up"></i>
@@ -87,52 +90,30 @@
                                 {% endif %}
                             </div>
                         </div>
+                        
+                        
                     </div>
                     <div class="row mt-4">
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'editsheet' sheet.id %}" class="btn custom-blue-btn btn-sm" style="width: 49px;">
-                                Edit
-                            </a>
-                            <a href="{% url 'regeneratesheet' sheet.id %}" class="btn custom-blue-btn btn-sm">
-                                Regenerate
-                            </a>
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            {% if sheet.versions.exists or sheet.parent_sheet %}
+                                <a href="{% url 'worksheet_hierarchy' sheet.id %}" class="btn custom-blue-btn btn-sm">
+                                    <i class="fas fa-sitemap"></i> View Versions
+                                </a>
+                            {% else %}
+                                <div></div> <!-- Empty div to maintain spacing when no versions button -->
+                            {% endif %}
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'editsheet' sheet.id %}" class="btn custom-blue-btn btn-sm" style="width: 49px;">
+                                    Edit
+                                </a>
+                                <a href="{% url 'regeneratesheet' sheet.id %}" class="btn custom-blue-btn btn-sm">
+                                    Regenerate
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- {% if sheet.versions.exists or sheet.parent_sheet %}
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Version History</h5>
-                                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#versionHistory" aria-expanded="false" aria-controls="versionHistory">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
-                                <div class="collapse" id="versionHistory">
-                                    <div class="list-group mt-2">
-                                        {% if sheet.parent_sheet %}
-                                            <a href="{% url 'viewsheet' sheet.parent_sheet.id %}" class="list-group-item list-group-item-action">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">Version 1</h6>
-                                                    <small>{{ sheet.parent_sheet.created_at|date:"M d, Y" }}</small>
-                                                </div>
-                                                <p class="mb-1">Original version</p>
-                                            </a>
-                                        {% endif %}
-                                        {% for version in sheet.versions.all|dictsort:"version_number" %}
-                                            <a href="{% url 'viewsheet' version.id %}" class="list-group-item list-group-item-action {% if version.id == sheet.id %}active{% endif %}">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">Version {{ version.version_number }}</h6>
-                                                    <small>{{ version.created_at|date:"M d, Y" }}</small>
-                                                </div>
-                                                <p class="mb-1">{{ version.title }}</p>
-                                            </a>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %} -->
+                    
 
                     <div class="worksheet-preview">
                         {% if sheet.docx_file %}
@@ -147,49 +128,7 @@
                             </div>
                         {% endif %}
                     </div>
-                    {% if sheet.versions.exists or sheet.parent_sheet %}
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Version History</h5>
-                                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#versionHistory" aria-expanded="false" aria-controls="versionHistory">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
-                                <div class="collapse" id="versionHistory">
-                                    <div class="list-group mt-2">
-                                        {% if sheet.parent_sheet %}
-                                            <a href="{% url 'viewsheet' sheet.parent_sheet.id %}" class="list-group-item list-group-item-action">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">Version 1</h6>
-                                                    <small>{{ sheet.parent_sheet.created_at|date:"M d, Y" }}</small>
-                                                </div>
-                                                <p class="mb-1">Original version</p>
-                                            </a>
-                                        {% endif %}
-                                        {% for version in sheet.versions.all|dictsort:"version_number" %}
-                                            <a href="{% url 'viewsheet' version.id %}" class="list-group-item list-group-item-action {% if version.id == sheet.id %}active{% endif %}">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">Version {{ version.version_number }}</h6>
-                                                    <small>{{ version.created_at|date:"M d, Y" }}</small>
-                                                </div>
-                                                <p class="mb-1">{{ version.title }}</p>
-                                            </a>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                    {% if sheet.versions.exists or sheet.parent_sheet %}
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <a href="{% url 'worksheet_hierarchy' sheet.id %}" class="btn btn-outline-primary">
-                                    <i class="fas fa-sitemap"></i> View Worksheet Hierarchy
-                                </a>
-                            </div>
-                        </div>
-                    {% endif %}
+                
         
                 </div>
             </div>
