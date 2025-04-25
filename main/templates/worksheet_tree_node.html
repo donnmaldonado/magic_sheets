@@ -10,8 +10,9 @@
             {% endif %}
             <span class="flex-grow-1">
                 <span class="fw-medium">{{ sheet.title }}</span>
+                <span class="text-muted">{{ sheet.prompt.name }}</span>
             </span>
-            <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-sm btn-outline-primary ms-2">View</a>
+            <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-sm custom-blue-btn ms-2">View</a>
         </div>
     </div>
     {% if sheet.versions.exists %}
