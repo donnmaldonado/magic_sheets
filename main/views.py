@@ -483,3 +483,73 @@ def savedsheets(request):
         'selected_sort': sort_by,
     }
     return render(request, 'savedsheets.html', context)
+
+@login_required
+def dashboard(request):
+    # Get all sheets created by the current user
+    my_sheets = Sheet.objects.filter(user=request.user)
+    
+    # Get filter parameters from request
+    grade_level = request.GET.get('grade_level')
+    subject = request.GET.get('subject')
+    topic = request.GET.get('topic')
+    subtopic = request.GET.get('subtopic')
+    prompt_name = request.GET.get('prompt_name')
+    sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
+    
+    # Apply filters if they exist
+    if grade_level:
+        my_sheets = my_sheets.filter(grade_level_id=grade_level)
+    if subject:
+        my_sheets = my_sheets.filter(subject_id=subject)
+    if topic:
+        my_sheets = my_sheets.filter(topic_id=topic)
+    if subtopic:
+        my_sheets = my_sheets.filter(sub_topic_id=subtopic)
+    if prompt_name:
+        my_sheets = my_sheets.filter(prompt__name=prompt_name)
+    
+    # Apply sorting
+    if sort_by == 'date_desc':
+        my_sheets = my_sheets.order_by('-created_at')
+    elif sort_by == 'date_asc':
+        my_sheets = my_sheets.order_by('created_at')
+    elif sort_by == 'likes_desc':
+        my_sheets = my_sheets.annotate(total_likes=models.Count('likes')).order_by('-total_likes')
+    elif sort_by == 'likes_asc':
+        my_sheets = my_sheets.annotate(total_likes=models.Count('likes')).order_by('total_likes')
+    elif sort_by == 'rating_desc':
+        my_sheets = my_sheets.annotate(avg_rating=models.Avg('reviews__rating')).order_by('-avg_rating')
+    elif sort_by == 'rating_asc':
+        my_sheets = my_sheets.annotate(avg_rating=models.Avg('reviews__rating')).order_by('avg_rating')
+    
+    # Get all available options for filters
+    grade_levels = GradeLevel.objects.all()
+    subjects = Subject.objects.all()
+    topics = Topic.objects.all()
+    subtopics = SubTopic.objects.all()
+    prompt_names = Prompt.objects.filter(type="GENERATE").values_list('name', flat=True).distinct()
+    
+    # Add average rating and review count to each sheet
+    for sheet in my_sheets:
+        # Calculate average rating
+        avg_rating = sheet.reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+        sheet.avg_rating = round(avg_rating) if avg_rating else None
+        # Calculate review count
+        sheet.review_count = sheet.reviews.count()
+    
+    context = {
+        'my_sheets': my_sheets,
+        'grade_levels': grade_levels,
+        'subjects': subjects,
+        'topics': topics,
+        'subtopics': subtopics,
+        'prompt_names': prompt_names,
+        'selected_grade': grade_level,
+        'selected_subject': subject,
+        'selected_topic': topic,
+        'selected_subtopic': subtopic,
+        'selected_prompt_name': prompt_name,
+        'selected_sort': sort_by,
+    }
+    return render(request, 'dashboard.html', context)
