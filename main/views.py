@@ -485,7 +485,7 @@ def savedsheets(request):
     return render(request, 'savedsheets.html', context)
 
 @login_required
-def dashboard(request):
+def mysheets(request):
     # Get all sheets created by the current user
     my_sheets = Sheet.objects.filter(user=request.user)
     
@@ -552,4 +552,4 @@ def dashboard(request):
         'selected_prompt_name': prompt_name,
         'selected_sort': sort_by,
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, 'mysheets.html', context)

@@ -17,5 +17,5 @@ urlpatterns = [
     path('regeneratesheet/<int:sheet_id>/', views.regeneratesheet, name='regeneratesheet'),
     path('communitysheets/', views.communitysheets, name='communitysheets'),
     path('copy_sheet/<int:sheet_id>/', views.copy_sheet, name='copy_sheet'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('mysheets/', views.mysheets, name='mysheets'),
 ]
