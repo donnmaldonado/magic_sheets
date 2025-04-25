@@ -422,6 +422,7 @@ def savedsheets(request):
     subject = request.GET.get('subject')
     topic = request.GET.get('topic')
     subtopic = request.GET.get('subtopic')
+    prompt_name = request.GET.get('prompt_name')
     sort_by = request.GET.get('sort_by', 'date_desc')  # Default to newest first
     
     # Apply filters if they exist
@@ -433,6 +434,8 @@ def savedsheets(request):
         saved_sheets = saved_sheets.filter(topic_id=topic)
     if subtopic:
         saved_sheets = saved_sheets.filter(sub_topic_id=subtopic)
+    if prompt_name:
+        saved_sheets = saved_sheets.filter(prompt__name=prompt_name)
     
     # Apply sorting
     if sort_by == 'date_desc':
@@ -443,12 +446,27 @@ def savedsheets(request):
         saved_sheets = saved_sheets.annotate(total_likes=models.Count('likes')).order_by('-total_likes')
     elif sort_by == 'likes_asc':
         saved_sheets = saved_sheets.annotate(total_likes=models.Count('likes')).order_by('total_likes')
+    elif sort_by == 'rating_desc':
+        saved_sheets = saved_sheets.annotate(avg_rating=models.Avg('reviews__rating')).order_by('-avg_rating')
+    elif sort_by == 'rating_asc':
+        saved_sheets = saved_sheets.annotate(avg_rating=models.Avg('reviews__rating')).order_by('avg_rating')
     
     # Get all available options for filters
     grade_levels = GradeLevel.objects.all()
     subjects = Subject.objects.all()
     topics = Topic.objects.all()
     subtopics = SubTopic.objects.all()
+    prompt_names = Prompt.objects.filter(type="GENERATE").values_list('name', flat=True).distinct()
+    
+    # Add is_saved information and average rating to each sheet
+    saved_sheet_ids = set(SavedSheet.objects.filter(user=request.user).values_list('sheet_id', flat=True))
+    for sheet in saved_sheets:
+        sheet.is_saved = sheet.id in saved_sheet_ids
+        # Calculate average rating
+        avg_rating = sheet.reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+        sheet.avg_rating = round(avg_rating) if avg_rating else None
+        # Calculate review count
+        sheet.review_count = sheet.reviews.count()
     
     context = {
         'saved_sheets': saved_sheets,
@@ -456,10 +474,12 @@ def savedsheets(request):
         'subjects': subjects,
         'topics': topics,
         'subtopics': subtopics,
+        'prompt_names': prompt_names,
         'selected_grade': grade_level,
         'selected_subject': subject,
         'selected_topic': topic,
         'selected_subtopic': subtopic,
+        'selected_prompt_name': prompt_name,
         'selected_sort': sort_by,
     }
     return render(request, 'savedsheets.html', context)
