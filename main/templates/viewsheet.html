@@ -98,6 +98,42 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- {% if sheet.versions.exists or sheet.parent_sheet %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Version History</h5>
+                                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#versionHistory" aria-expanded="false" aria-controls="versionHistory">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="collapse" id="versionHistory">
+                                    <div class="list-group mt-2">
+                                        {% if sheet.parent_sheet %}
+                                            <a href="{% url 'viewsheet' sheet.parent_sheet.id %}" class="list-group-item list-group-item-action">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">Version 1</h6>
+                                                    <small>{{ sheet.parent_sheet.created_at|date:"M d, Y" }}</small>
+                                                </div>
+                                                <p class="mb-1">Original version</p>
+                                            </a>
+                                        {% endif %}
+                                        {% for version in sheet.versions.all|dictsort:"version_number" %}
+                                            <a href="{% url 'viewsheet' version.id %}" class="list-group-item list-group-item-action {% if version.id == sheet.id %}active{% endif %}">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">Version {{ version.version_number }}</h6>
+                                                    <small>{{ version.created_at|date:"M d, Y" }}</small>
+                                                </div>
+                                                <p class="mb-1">{{ version.title }}</p>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %} -->
+
                     <div class="worksheet-preview">
                         {% if sheet.docx_file %}
                             <div class="preview-container ">
@@ -111,6 +147,40 @@
                             </div>
                         {% endif %}
                     </div>
+                    {% if sheet.versions.exists or sheet.parent_sheet %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Version History</h5>
+                                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#versionHistory" aria-expanded="false" aria-controls="versionHistory">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="collapse" id="versionHistory">
+                                    <div class="list-group mt-2">
+                                        {% if sheet.parent_sheet %}
+                                            <a href="{% url 'viewsheet' sheet.parent_sheet.id %}" class="list-group-item list-group-item-action">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">Version 1</h6>
+                                                    <small>{{ sheet.parent_sheet.created_at|date:"M d, Y" }}</small>
+                                                </div>
+                                                <p class="mb-1">Original version</p>
+                                            </a>
+                                        {% endif %}
+                                        {% for version in sheet.versions.all|dictsort:"version_number" %}
+                                            <a href="{% url 'viewsheet' version.id %}" class="list-group-item list-group-item-action {% if version.id == sheet.id %}active{% endif %}">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">Version {{ version.version_number }}</h6>
+                                                    <small>{{ version.created_at|date:"M d, Y" }}</small>
+                                                </div>
+                                                <p class="mb-1">{{ version.title }}</p>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
         
                 </div>
             </div>

@@ -279,6 +279,13 @@ def regeneratesheet(request, sheet_id):
             'short_answer': original_sheet.short_answer_count
         })
         if form.is_valid():
+            # Get the root sheet (original sheet or its parent)
+            root_sheet = original_sheet.parent_sheet if original_sheet.parent_sheet else original_sheet
+            
+            # Get the latest version number
+            latest_version = Sheet.objects.filter(parent_sheet=root_sheet).order_by('-version_number').first()
+            new_version_number = (latest_version.version_number + 1) if latest_version else 2
+            
             # Create a new sheet based on the original
             new_sheet = Sheet.objects.create(
                 user=request.user,
@@ -288,14 +295,15 @@ def regeneratesheet(request, sheet_id):
                 subject=original_sheet.subject,
                 topic=original_sheet.topic,
                 sub_topic=original_sheet.sub_topic,
-                # Add the new question counts to the original counts
                 true_false_count=original_sheet.true_false_count + int(form.cleaned_data['true_false_questions']),
                 fill_in_the_blank_count=original_sheet.fill_in_the_blank_count + int(form.cleaned_data['fill_blank_questions']),
                 multiple_choice_count=original_sheet.multiple_choice_count + int(form.cleaned_data['multiple_choice_questions']),
                 short_answer_count=original_sheet.short_answer_count + int(form.cleaned_data['short_answer_questions']),
                 include_answer_key=form.cleaned_data['include_answer_key'],
                 prompt=original_sheet.prompt,
-                content=original_sheet.content 
+                content=original_sheet.content,
+                parent_sheet=root_sheet,
+                version_number=new_version_number
             )
             
             try:
