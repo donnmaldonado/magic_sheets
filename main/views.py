@@ -344,6 +344,7 @@ def regeneratesheet(request, sheet_id):
         'sheet': original_sheet
     })
 
+@login_required
 def communitysheets(request):
     # Get all published sheets ordered by creation date (newest first)
     published_sheets = Sheet.objects.filter(published=True)

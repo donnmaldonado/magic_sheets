@@ -150,59 +150,59 @@
         <div class="col-md-10">
             <div class="card">
                 <div class="card-body">
-                    <h3 class="card-title" id="reviews">Feedback</h3>
-                    
-                    <!-- Review Form -->
-                    {% if request.user.is_authenticated %}
-                    <div class="review-form mb-3">
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="mb-1">
-                                <label class="form-label me-2"><h4>Rating: </h4></label>
-                                <div class="star-rating">
-                                    {% for i in "54321"|make_list %}
-                                    <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" 
-                                           {% if user_review and user_review.rating == i|add:"0" %}checked{% endif %}
-                                           required>
-                                    <label for="star{{ i }}"><i class="fas fa-star"></i></label>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Comment (optional)">{% if user_review %}{{ user_review.comment }}{% endif %}</textarea>
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn custom-blue-btn btn-sm">{% if user_review %}Update Review{% else %}Submit Review{% endif %}</button>
-                            </div>
-                        </form>
-                    </div>
-                    {% endif %}
-
-                    <!-- Reviews List -->
-                    <div class="reviews-list">
-                        {% if reviews %}
-                            {% for review in reviews %}
-                            <div class="review-item mb-3 p-3 border rounded">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <div>
-                                        <strong class="me-2">{{ review.user.username }}</strong>
-                                        <div class="star-rating-display small-stars">
-                                            {% for i in "12345" %}
-                                            <i class="fas fa-star {% if i|add:'0' <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
-                                            {% endfor %}
-                                        </div>
+                        <h3 class="card-title">Feedback</h3>
+                        
+                        <!-- Review Form -->
+                        {% if request.user.is_authenticated %}
+                        <div class="review-form mb-3">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="mb-1">
+                                    <label class="form-label me-2"><h4>Rating: </h4></label>
+                                    <div class="star-rating">
+                                        {% for i in "54321"|make_list %}
+                                        <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" 
+                                               {% if user_review and user_review.rating == i|add:"0" %}checked{% endif %}
+                                               required>
+                                        <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                                        {% endfor %}
                                     </div>
-                                    <small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small>
                                 </div>
-                                {% if review.comment %}
-                                <p class="mb-0">{{ review.comment }}</p>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted">No reviews yet. Be the first to review this worksheet!</p>
+                                <div class="mb-3">
+                                    <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Comment (optional)">{% if user_review %}{{ user_review.comment }}{% endif %}</textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn custom-blue-btn btn-sm">{% if user_review %}Update Review{% else %}Submit Review{% endif %}</button>
+                                </div>
+                            </form>
+                        </div>
                         {% endif %}
-                    </div>
+
+                        <!-- Reviews List -->
+                        <div class="reviews-list">
+                            {% if reviews %}
+                                {% for review in reviews %}
+                                <div class="review-item mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong class="me-2">{{ review.user.username }}</strong>
+                                            <div class="star-rating-display small-stars">
+                                                {% for i in "12345" %}
+                                                <i class="fas fa-star {% if i|add:'0' <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small>
+                                    </div>
+                                    {% if review.comment %}
+                                    <p class="mb-0">{{ review.comment }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No reviews yet. Be the first to review this worksheet!</p>
+                            {% endif %}
+                        </div>
                 </div>
             </div>
         </div>
@@ -276,28 +276,6 @@ document.getElementById('saveBtn').addEventListener('click', function() {
     .then(data => {
         button.textContent = data.saved ? 'Unsave' : 'Save';
     });
-});
-
-// Scroll to reviews section if URL has #reviews
-function scrollToReviews() {
-    const reviewsSection = document.getElementById('reviews');
-    if (reviewsSection) {
-        const offset = 100; // Adjust this value based on your header height
-        const elementPosition = reviewsSection.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
-    }
-}
-
-// Also try scrolling when the page is fully loaded
-window.addEventListener('load', function() {
-    if (window.location.hash === '#reviews') {
-        scrollToReviews();
-    }
 });
 </script>
 {% endblock %}
