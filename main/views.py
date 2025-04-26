@@ -129,6 +129,11 @@ def viewsheet(request, sheet_id):
     # Get reviews for the sheet
     reviews = Review.objects.filter(sheet=sheet).order_by('-created_at')
     
+    # Calculate average rating and review count
+    avg_rating = reviews.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+    average_rating = round(avg_rating) if avg_rating else 0
+    review_count = reviews.count()
+    
     # Check if user has already reviewed this sheet
     user_review = None
     if request.user.is_authenticated:
@@ -167,7 +172,9 @@ def viewsheet(request, sheet_id):
         'regenerate_prompts': regenerate_prompts,
         'reviews': reviews,
         'user_review': user_review,
-        'review_form': form
+        'review_form': form,
+        'average_rating': average_rating,
+        'review_count': review_count
     }
     
     return render(request, 'viewsheet.html', context)

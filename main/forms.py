@@ -249,6 +249,6 @@ class ReviewForm(forms.Form):
         required=True
     )
     comment = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Comment (optional)'}),
         required=False
     )
