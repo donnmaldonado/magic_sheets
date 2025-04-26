@@ -8,7 +8,7 @@
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Create New Sheet</h2>
                     
-                    <form method="POST" action="{% url 'createsheet' %}">
+                    <form method="POST" action="{% url 'createsheet' %}" id="createSheetForm">
                         {% csrf_token %}
                         <div class="form-group mb-3">
                             <label class="form-label" for="{{ form.title.id_for_label }}">Worksheet Title</label>
@@ -109,7 +109,12 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <button type="submit" class="btn custom-blue-btn">Create Sheet</button>
+                            <button type="submit" class="btn custom-blue-btn" id="submitButton">
+                                <span id="buttonText">Create Sheet</span>
+                                <div id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -227,6 +232,18 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initialize on page load
         updateQuestionCount();
+
+    // Add form submission handler
+    const form = document.getElementById('createSheetForm');
+    const submitButton = document.getElementById('submitButton');
+    const buttonText = document.getElementById('buttonText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    form.addEventListener('submit', function() {
+        submitButton.disabled = true;
+        buttonText.textContent = 'Creating...';
+        loadingSpinner.classList.remove('d-none');
+    });
 });   
 </script>
 {% endblock %}

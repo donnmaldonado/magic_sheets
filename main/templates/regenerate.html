@@ -96,7 +96,12 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn custom-blue-btn" id="regenerateBtn">Regenerate Worksheet</button>
+                            <button type="submit" class="btn custom-blue-btn" id="regenerateBtn">
+                                <span id="buttonText">Regenerate Worksheet</span>
+                                <div id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </button>
                             <a href="{% url 'viewsheet' sheet.id %}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
@@ -111,6 +116,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('regenerateForm');
     const regenerateBtn = document.getElementById('regenerateBtn');
+    const buttonText = document.getElementById('buttonText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
     const tfInput = document.getElementById('{{ form.true_false_questions.id_for_label }}');
     const fbInput = document.getElementById('{{ form.fill_blank_questions.id_for_label }}');
     const mcInput = document.getElementById('{{ form.multiple_choice_questions.id_for_label }}');
@@ -172,14 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Form submission handler
     form.addEventListener('submit', function(e) {
-        console.log('Form submitted');
         const total = Array.from(allInputs).reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
         if (total > maxQuestions) {
             e.preventDefault();
             console.log('Form submission prevented - total questions exceed limit');
             return;
         }
-        console.log('Form submission proceeding');
         
         // Ensure hidden fields are properly set
         const currentTrueFalse = document.getElementById('{{ form.current_true_false.id_for_label }}');
@@ -188,10 +193,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentShortAnswer = document.getElementById('{{ form.current_short_answer.id_for_label }}');
         
         if (!currentTrueFalse.value || !currentFillBlank.value || !currentMultipleChoice.value || !currentShortAnswer.value) {
-            console.log('Missing current count values');
             e.preventDefault();
+            console.log('Missing current count values');
             return;
         }
+        
+        // Show loading state
+        regenerateBtn.disabled = true;
+        buttonText.textContent = 'Regenerating...';
+        loadingSpinner.classList.remove('d-none');
+        
+        // Allow form to submit normally
     });
     
     // Initialize on page load
