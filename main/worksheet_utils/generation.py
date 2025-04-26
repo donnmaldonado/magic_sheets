@@ -32,6 +32,7 @@ def generate_worksheet_content(sheet):
     - {sheet.short_answer_count} Short answer questions
     
     Number the questions consecutively.
+    Don't add name or date to the worksheet.
     """
 
     format = 'Please deliver the worksheet response inside triple quotes (""") and ensure there is no Markdown formatting, no special characters, and no extra spaces. Deliver the response as plain text within the quotes.'
@@ -73,7 +74,7 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
     Use the following instruction as a guide to regenerate the worksheet: 
     {prompt.text}\n
 
-    1. For the original questions, keep them as is in essence but regenerate them with the new instructions.
+    1. For the original questions, regenerate them with the new instructions but keep their main ideas the same.
     2. Add the following number of new questions for each type:
     - {additional_questions['true_false']} True/False questions
     - {additional_questions['fill_blank']} Fill in the blank questions
@@ -83,6 +84,7 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
     Remember:
     1. Include Answer Key: {sheet.include_answer_key}
     2. If there are new questions, group them with their respective question type and renumber all the question so they are consecutive. 
+    3. Don't add name or date to the worksheet.
     """
     format = 'Please deliver the worksheet response inside triple quotes (""") and ensure there is no Markdown formatting, no special characters, and no extra spaces. Deliver the response as plain text within the quotes.'
 
