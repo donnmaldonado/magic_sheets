@@ -381,7 +381,7 @@ def communitysheets(request):
     subjects = Subject.objects.all()
     topics = Topic.objects.all()
     subtopics = SubTopic.objects.all()
-    prompt_names = Prompt.objects.filter(type="GENERATE").values_list('name', flat=True).distinct()
+    prompt_names = Prompt.objects.all().values_list('name', flat=True).distinct()
     
     # Add is_saved information and average rating to each sheet
     if request.user.is_authenticated:
