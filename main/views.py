@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm, ReviewForm, RegenerateSheetForm
-from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, GradeLevel, Subject, Review
+from .forms import UserLoginForm, UserRegistrationForm, SheetCreationForm, ReviewForm, RegenerateSheetForm, PasswordResetRequestForm, PasswordResetConfirmForm
+from .models import Sheet, Topic, SubTopic, Prompt, SavedSheet, LikedSheet, GradeLevel, Subject, Review, User
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -10,6 +10,14 @@ from .worksheet_utils.file_utils import create_sheet, create_worksheet_files
 from .worksheet_utils.generation import regenerate_worksheet_content
 from django.db import models
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils.crypto import get_random_string
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.template.loader import render_to_string
+from django.contrib.auth import get_user_model
 # Create your views here.
 
 def home(request):
@@ -621,3 +629,73 @@ def worksheet_hierarchy(request, sheet_id):
         'current_sheet_id': sheet_id,
         'current_path': current_path
     })
+
+def password_reset(request):
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+                
+                # Generate token and uid
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                
+                # Create reset link
+                reset_link = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}/"
+                
+                # Send email
+                subject = 'Password Reset Request - Magic Sheets'
+                message = render_to_string('password_reset_email.html', {
+                    'user': user,
+                    'reset_link': reset_link,
+                })
+                
+                try:
+                    send_mail(
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        fail_silently=False,
+                    )
+                    messages.success(request, 'Password reset link has been sent to your email.')
+                    return redirect('login')
+                except Exception as e:
+                    print(f"Email sending error: {str(e)}")  # For debugging
+                    messages.error(request, f'Failed to send password reset email: {str(e)}')
+            except User.DoesNotExist:
+                messages.error(request, 'No account exists with this email address.')
+            except Exception as e:
+                print(f"Unexpected error: {str(e)}")  # For debugging
+                messages.error(request, 'An unexpected error occurred. Please try again later.')
+    else:
+        form = PasswordResetRequestForm()
+    
+    return render(request, 'password_reset.html', {'form': form})
+
+def password_reset_confirm(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = PasswordResetConfirmForm(request.POST)
+            if form.is_valid():
+                new_password = form.cleaned_data['new_password1']
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Your password has been reset successfully. Please login with your new password.')
+                return redirect('login')
+        else:
+            form = PasswordResetConfirmForm()
+        
+        return render(request, 'password_reset_confirm.html', {'form': form})
+    else:
+        messages.error(request, 'The password reset link is invalid or has expired.')
+        return redirect('password_reset')

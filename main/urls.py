@@ -19,4 +19,6 @@ urlpatterns = [
     path('copy_sheet/<int:sheet_id>/', views.copy_sheet, name='copy_sheet'),
     path('mysheets/', views.mysheets, name='mysheets'),
     path('sheet/<int:sheet_id>/hierarchy/', views.worksheet_hierarchy, name='worksheet_hierarchy'),
+    path("password-reset/", views.password_reset, name="password_reset"),
+    path("reset-password/<uidb64>/<token>/", views.password_reset_confirm, name="password_reset_confirm"),
 ]
