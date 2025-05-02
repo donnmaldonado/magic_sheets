@@ -241,7 +241,7 @@
 // Like button
 document.getElementById('likeBtn').addEventListener('click', function() {
     const sheetId = this.dataset.sheetId;
-    const likeCount = document.getElementById('likeCount');
+    const likeCount = this.querySelector('.like-count');
     const icon = this.querySelector('i');
     
     fetch(`/sheet/${sheetId}/toggle-like/`, {

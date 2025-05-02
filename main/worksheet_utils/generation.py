@@ -33,6 +33,7 @@ def generate_worksheet_content(sheet):
     
     Number the questions consecutively.
     Don't add name or date to the worksheet.
+    Make sure the questions are descriptive and provide enough information for the student to understand the question.
     """
 
     format = 'Please deliver the worksheet response inside triple quotes (""") and ensure there is no Markdown formatting, no special characters, and no extra spaces. Deliver the response as plain text within the quotes.'
