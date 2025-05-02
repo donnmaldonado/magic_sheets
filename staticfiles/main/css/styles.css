@@ -1,0 +1,41 @@
+body {
+    background-color: #DDE6ED  !important;
+}
+
+.custom-navbar {
+    background-color: #27374D !important;
+}
+
+.main-content {
+    background-color: #DDE6ED !important;
+}
+
+.footer {
+    background-color: #DDE6ED !important;
+}
+.navbar-brand {
+    font-family: 'Leckerli One', cursive;
+    font-size: 2rem;
+}
+.content-display {
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.25rem;
+}
+.worksheet-text {
+    white-space: pre-wrap;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+.custom-blue-btn {
+    background-color: #27374D !important;
+    border-color: #27374D !important;
+    color: white !important;
+}
+.custom-blue-btn:hover {
+    background-color: #526D82 !important;
+    border-color: #526D82 !important;
+    color: white !important;
+}
