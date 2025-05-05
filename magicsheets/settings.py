@@ -84,7 +84,7 @@ WSGI_APPLICATION = "magicsheets.wsgi.application"
 DATABASES = {
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default='postgresql://magic_sheets_user:QFEnVCPAEeZRaIERG9zcEcB1qo5owmZ2@dpg-d0aioos9c44c73e8gv3g-a.oregon-postgres.render.com/magic_sheets',
+        default='postgresql://magic_sheets_db_user:7HqKpmKeqZ9xx17zk4rtzgkElC3S5BUy@dpg-d0c2piruibrs73dp52s0-a/magic_sheets_db',
         conn_max_age=600
     )
 }
