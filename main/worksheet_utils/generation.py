@@ -47,7 +47,7 @@ def generate_worksheet_content(sheet):
                 {"role": "system", "content": "You are a professional educator creating a worksheet."},
                 {"role": "user", "content": prompt + specifications + format}
             ],
-            max_tokens=3000
+            max_tokens=4000
         )
         print("\nToken Usage:")
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
@@ -86,7 +86,7 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
     1. Include Answer Key: {sheet.include_answer_key}
     2. If there are new questions, group them with their respective question type and renumber all the question so they are consecutive. 
     3. Don't add name or date to the worksheet.
-    4. If there are new questions, make sure to add the answer key for the new questions and old questions.
+    4. Make sure the answer key has answers for all the questions in the worksheet, new and old.
 
     """
     format = 'Please deliver the worksheet response inside triple quotes (""") and ensure there is no Markdown formatting, no special characters, and no extra spaces. Deliver the response as plain text within the quotes.'
@@ -102,7 +102,7 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
                 {"role": "system", "content": "You are a professional educator creating a worksheet."},
                 {"role": "user", "content": specifications + "Here is the original worksheet: " + content + "\nMake sure to" + format}
             ],
-            max_tokens=3000
+            max_tokens=4000
         )
         print("\nToken Usage:")
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
