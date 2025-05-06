@@ -80,7 +80,7 @@ WSGI_APPLICATION = "magicsheets.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Replace the SQLite DATABASES configuration with PostgreSQL:
+# PostgreSQL DATABASES configuration for production
 DATABASES = {
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
@@ -88,6 +88,14 @@ DATABASES = {
         conn_max_age=600
     )
 }
+
+# SQLite DATABASES configuration for local development
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation

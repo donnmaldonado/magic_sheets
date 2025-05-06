@@ -86,6 +86,7 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
     1. Include Answer Key: {sheet.include_answer_key}
     2. If there are new questions, group them with their respective question type and renumber all the question so they are consecutive. 
     3. Don't add name or date to the worksheet.
+    5. If there are new questions, make sure to add the answer key for the new questions and old questions.
     """
     format = 'Please deliver the worksheet response inside triple quotes (""") and ensure there is no Markdown formatting, no special characters, and no extra spaces. Deliver the response as plain text within the quotes.'
 
