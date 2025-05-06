@@ -81,21 +81,21 @@ WSGI_APPLICATION = "magicsheets.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # PostgreSQL DATABASES configuration for production
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         # Replace this value with your local database's connection string.
-#         default='postgresql://magic_sheets_db_user:7HqKpmKeqZ9xx17zk4rtzgkElC3S5BUy@dpg-d0c2piruibrs73dp52s0-a/magic_sheets_db',
-#         conn_max_age=600
-#     )
-# }
+DATABASES = {
+    'default': dj_database_url.config(
+        # Replace this value with your local database's connection string.
+        default='postgresql://magic_sheets_db_user:7HqKpmKeqZ9xx17zk4rtzgkElC3S5BUy@dpg-d0c2piruibrs73dp52s0-a/magic_sheets_db',
+        conn_max_age=600
+    )
+}
 
 # SQLite DATABASES configuration for local development
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
