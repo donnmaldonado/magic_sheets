@@ -75,8 +75,8 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
     Use the following instruction as a guide to regenerate the worksheet: 
     {prompt.text}\n
 
-    1. For the original questions, regenerate them with the new instructions but keep their main ideas the same.
-    2. Add the following number of new questions for each type:
+    1. Make sure to keep the original questions in the worksheet, just regenerate them with the new instructions but keep their main ideas the same.
+    2. Add the following number of new questions for each type, keep the old questions but add these new ones:
     - {additional_questions['true_false']} True/False questions
     - {additional_questions['fill_blank']} Fill in the blank questions
     - {additional_questions['multiple_choice']} Multiple choice questions
@@ -86,7 +86,8 @@ def regenerate_worksheet_content(sheet, prompt, additional_questions):
     1. Include Answer Key: {sheet.include_answer_key}
     2. If there are new questions, group them with their respective question type and renumber all the question so they are consecutive. 
     3. Don't add name or date to the worksheet.
-    5. If there are new questions, make sure to add the answer key for the new questions and old questions.
+    4. If there are new questions, make sure to add the answer key for the new questions and old questions.
+
     """
     format = 'Please deliver the worksheet response inside triple quotes (""") and ensure there is no Markdown formatting, no special characters, and no extra spaces. Deliver the response as plain text within the quotes.'
 
