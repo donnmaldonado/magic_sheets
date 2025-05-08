@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "import_export",
 ]
 
 MIDDLEWARE = [
@@ -84,12 +85,12 @@ WSGI_APPLICATION = "magicsheets.wsgi.application"
 DATABASES = {
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default='postgresql://magic_sheets_db_user:7HqKpmKeqZ9xx17zk4rtzgkElC3S5BUy@dpg-d0c2piruibrs73dp52s0-a/magic_sheets_db',
+        default=os.getenv("DB_HOST"),
         conn_max_age=600
     )
 }
 
-# # SQLite DATABASES configuration for local development
+# SQLite DATABASES configuration for local development
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
