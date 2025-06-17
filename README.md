@@ -1,6 +1,6 @@
 # 🪄 MagicSheets
 
-MagicSheets is a generative AI-powered platform that helps educators, parents, and students quickly create and customize worksheets for K–12 learning. Users can generate worksheets by topic, type (e.g. multiple choice, short answer), and complexity—then refine them, regenerate with special instructions, and save or share them with the community.
+MagicSheets is a generative AI-powered platform that helps educators, parents, and students quickly create and customize worksheets for K–12 learning. Users can generate worksheets by topic, type (e.g. multiple choice, short answer), and complexity, then refine them, regenerate with special instructions, and save or share them with the community.
 
 ## 🚀 Features
 
