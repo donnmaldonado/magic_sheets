@@ -1,31 +1,31 @@
-# 🪄 MagicSheets
+# MagicSheets
 
 MagicSheets is a generative AI-powered platform that helps educators, parents, and students quickly create and customize worksheets for K–12 learning. Users can generate worksheets by topic, type (e.g. multiple choice, short answer), and complexity, then refine them, regenerate with special instructions, and save or share them with the community.
 
-## 🚀 Features
+## Features
 
-- ✏️ **Worksheet Generator**  
+- **Worksheet Generator**  
   Choose subject, grade, topic, and worksheet type. Supports Multiple Choice, Fill-in-the-Blank, True/False, and more.
 
-- 🔁 **Custom Regeneration**  
+- **Custom Regeneration**  
   Regenerate worksheets with smart prompts like "make it more descriptive" or "simplify."
 
-- 📄 **Answer Sheets**  
+- **Answer Sheets**  
   Toggle answer key generation with each worksheet.
 
-- 🧠 **Powered by LLMs**  
+- **Powered by LLMs**  
   Uses OpenAI’s API for fast, context-aware worksheet creation.
 
-- 🧰 **Curriculum-Based Structure**  
+- **Curriculum-Based Structure**  
   Organized by subject, grade, topic, and subtopic to support standards-aligned learning.
 
-- 🌐 **Community Tools**  
+- **Community Tools**  
   Save, vote, and remix worksheets from others in the MagicSheets ecosystem.
 
-- 📝 **In-Browser DOCX Editing**  
+- **In-Browser DOCX Editing**  
   Users can modify worksheets directly in the browser before downloading.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Django, PostgreSQL  
 - **Frontend:** Django templates, JavaScript  
@@ -34,7 +34,7 @@ MagicSheets is a generative AI-powered platform that helps educators, parents, a
 - **Deployment:** Render, Gunicorn, WhiteNoise  
 - **Environment Management:** Python 3.11, virtualenv  
 
-## 📦 Setup Instructions
+## Setup Instructions
 
 1. **Clone the Repository**
    ```bash
